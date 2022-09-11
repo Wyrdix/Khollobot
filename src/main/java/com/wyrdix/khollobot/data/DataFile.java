@@ -16,40 +16,19 @@ import java.util.*;
 public class DataFile extends DataJsonNode {
 
     private static DataFile INSTANCE = null;
-
     private final Map<Long, UserData> users = new HashMap<>();
+    private long mailChannel;
 
     public DataFile(JsonObject object) {
         super(object);
 
         JsonOptional.ofNullable(object.getAsJsonArray("users"))
-                .ifPresent(array -> users.putAll(getMap(obj->obj.get("id_long").getAsLong(), UserData.class, array, true)));
+                .ifPresent(array -> users.putAll(getMap(obj -> obj.get("id_long").getAsLong(), UserData.class, array, true)));
+        mailChannel = JsonOptional.ofNullable(object.get("mail_channel")).map(JsonElement::getAsLong).orElse(-1L);
     }
 
-    public Optional<UserData> getUser(long id){
-        return Optional.ofNullable(users.get(id));
-    }
-
-    public boolean newUser(long id, String discord_name){
-        if(users.containsKey(id)) return false;
-        users.put(id, new UserData(id, discord_name));
-        save();
-        return true;
-    }
-
-    @Override
-    public JsonObject collect() {
-        JsonObject collect = super.collect();
-
-        JsonArray usersArray = new JsonArray();
-        users.values().forEach(s->usersArray.add(s.collect()));
-        collect.add("users", usersArray);
-
-        return collect;
-    }
-
-    public static DataFile getInstance(){
-        if(INSTANCE == null) load();
+    public static DataFile getInstance() {
+        if (INSTANCE == null) load();
         return INSTANCE;
     }
 
@@ -63,7 +42,7 @@ public class DataFile extends DataJsonNode {
         }
     }
 
-    public static void save(){
+    public static void save() {
         File file = new File("data.json");
         String raw = new Gson().toJson(getInstance().collect());
         try {
@@ -73,5 +52,43 @@ public class DataFile extends DataJsonNode {
         }
     }
 
+    public Collection<UserData> getUsers() {
+        return users.values();
+    }
 
+    public Optional<UserData> getUser(long id) {
+        return Optional.ofNullable(users.get(id));
+    }
+
+    public boolean newUser(long id, String discord_name) {
+        if (users.containsKey(id)) return false;
+        users.put(id, new UserData(id, discord_name));
+        save();
+        return true;
+    }
+
+    @Override
+    public JsonObject collect() {
+        JsonObject collect = super.collect();
+
+        JsonArray usersArray = new JsonArray();
+        users.values().forEach(s -> usersArray.add(s.collect()));
+        collect.add("users", usersArray);
+        collect.addProperty("mail_channel", mailChannel);
+
+        return collect;
+    }
+
+
+    public boolean hasUser(long idLong) {
+        return users.containsKey(idLong);
+    }
+
+    public void setMailChannel(long mailChannel) {
+        this.mailChannel = mailChannel;
+    }
+
+    public long getMailChannel() {
+        return mailChannel;
+    }
 }

@@ -1,7 +1,9 @@
 package com.wyrdix.khollobot.data;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.wyrdix.data.json.DataJsonNode;
+import com.wyrdix.data.utils.JsonOptional;
 
 public class UserData extends DataJsonNode {
 
@@ -10,6 +12,8 @@ public class UserData extends DataJsonNode {
     private String first_name;
     private String last_name;
     private int group;
+    private int state = 0;
+    private boolean dmMail;
 
     public UserData(JsonObject object) {
         super(object);
@@ -19,6 +23,7 @@ public class UserData extends DataJsonNode {
         first_name = object.get("first_name").getAsString();
         last_name = object.get("second_name").getAsString();
         group = object.get("group").getAsInt();
+        dmMail = JsonOptional.ofNullable(object.get("dm_mail")).map(JsonElement::getAsBoolean).orElse(false);
     }
 
     public UserData(long id_long, String discord_name) {
@@ -28,6 +33,11 @@ public class UserData extends DataJsonNode {
         this.first_name = "";
         this.last_name = "";
         this.group = -1;
+        this.dmMail = false;
+    }
+
+    public long getId_long() {
+        return id_long;
     }
 
     public String getFirst_name() {
@@ -47,6 +57,7 @@ public class UserData extends DataJsonNode {
         collect.addProperty("first_name", first_name);
         collect.addProperty("second_name", last_name);
         collect.addProperty("group", group);
+        collect.addProperty("dm_mail", dmMail);
 
 
         return collect;
@@ -74,5 +85,22 @@ public class UserData extends DataJsonNode {
                ", second_name='" + last_name + '\'' +
                ", group=" + group +
                '}';
+    }
+
+    public int getState() {
+        return state;
+    }
+
+    public UserData setState(int state) {
+        this.state = state;
+        return this;
+    }
+
+    public void setDmMail(boolean dmMail) {
+        this.dmMail = dmMail;
+    }
+
+    public boolean getDmMail() {
+        return dmMail;
     }
 }
