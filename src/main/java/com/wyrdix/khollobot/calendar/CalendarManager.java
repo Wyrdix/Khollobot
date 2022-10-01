@@ -21,16 +21,15 @@ import java.util.TimeZone;
 
 public class CalendarManager {
 
-    private static Calendar holidayCalendar;
-    private static ZoneId zoneId = ZoneId.of("Europe/Paris");
-    private static TimeZone timeZone = TimeZone.getTimeZone(zoneId);
-    private static List<Holiday> holidays = new ArrayList<>();
-    private static java.util.Calendar doomsday = java.util.Calendar.getInstance(timeZone);
+    private static final ZoneId zoneId = ZoneId.of("Europe/Paris");
+    private static final TimeZone timeZone = TimeZone.getTimeZone(zoneId);
+    private static final List<Holiday> holidays = new ArrayList<>();
+    private static final java.util.Calendar doomsday = java.util.Calendar.getInstance(timeZone);
 
     public static int getCurrentWeek(){
 
         java.util.Calendar current = java.util.Calendar.getInstance(timeZone);
-        Instant plus = current.toInstant().plus(2, ChronoUnit.DAYS);
+        Instant plus = current.toInstant().plus(3, ChronoUnit.DAYS);
         long between = 1 + ChronoUnit.WEEKS.between(doomsday.toInstant().atZone(zoneId), plus.atZone(zoneId));
 
         for (Holiday holiday : holidays) {
@@ -43,11 +42,12 @@ public class CalendarManager {
         return (int) between;
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
     public static void load() {
         InputStream fin = Thread.currentThread().getContextClassLoader().getResourceAsStream("data/Zone-B.ics");
         CalendarBuilder builder = new CalendarBuilder();
         try {
-            holidayCalendar = builder.build(fin);
+            Calendar holidayCalendar = builder.build(fin);
 
             java.util.Calendar calendar = doomsday;
             calendar.set(2022, java.util.Calendar.SEPTEMBER, 5);

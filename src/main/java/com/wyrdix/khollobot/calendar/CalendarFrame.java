@@ -1,10 +1,8 @@
 package com.wyrdix.khollobot.calendar;
 
-import com.wyrdix.khollobot.data.DataFile;
 import com.wyrdix.khollobot.data.UserData;
 import org.apache.commons.lang3.StringUtils;
 
-import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
@@ -20,45 +18,73 @@ import static com.wyrdix.khollobot.calendar.SchoolDayComponent.Type.*;
 
 public class CalendarFrame {
 
-    private static List<SchoolDayComponent> weekly_component = new ArrayList<>();
-    private static List<SchoolDayComponent> kholle_component = new ArrayList<>();
-    private static List<SchoolDayComponent> ds_component = new ArrayList<>();
-
+    private final static int WIDTH_OFFSET = 50;
+    private final static int END_COLUMN_OFFSET = 50;
+    private final static int HEIGHT_OFFSET = 50;
+    private final static int END_HEIGHT_OFFSET = 50;
     private final static int COLUMN_WIDTH = 200;
-    private final static int ELEMENT_HEIGHT = 75;
+    private final static int SEGEMENT_HEIGHT = 75;
 
+    private final static int DAYS_PER_WEEK = 5;
+    private final static int SEGMENTS_PER_DAY = 11;
+    private static final Color KHOLLE_BACK_COLOR = Color.decode("#e58e26");
+    private static final List<SchoolDayComponent> weekly_component = new ArrayList<>();
+    private static final List<SchoolDayComponent> kholle_component = new ArrayList<>();
+    private static final List<SchoolDayComponent> ds_component = new ArrayList<>();
 
-    public static BufferedImage getCalendar(UserData data, int week){
-        BufferedImage image = new BufferedImage(COLUMN_WIDTH * 5, ELEMENT_HEIGHT * 12, BufferedImage.TYPE_INT_RGB);
+    public static BufferedImage getCalendar(UserData data, int week) {
+        BufferedImage image = new BufferedImage(WIDTH_OFFSET + COLUMN_WIDTH * DAYS_PER_WEEK + END_COLUMN_OFFSET, HEIGHT_OFFSET + SEGEMENT_HEIGHT * SEGMENTS_PER_DAY + END_HEIGHT_OFFSET, BufferedImage.TYPE_INT_RGB);
 
         Graphics2D g2d = (Graphics2D) image.getGraphics();
+        g2d.setColor(Color.LIGHT_GRAY);
+        g2d.fillRect(0, 0, image.getWidth(), image.getHeight());
+
+        g2d.setColor(Color.BLACK);
+        g2d.fillRect(WIDTH_OFFSET, HEIGHT_OFFSET, COLUMN_WIDTH * DAYS_PER_WEEK, SEGEMENT_HEIGHT * SEGMENTS_PER_DAY);
+
+
+        g2d.setColor(Color.LIGHT_GRAY);
+        g2d.fillRect(WIDTH_OFFSET + 1, HEIGHT_OFFSET + 1, COLUMN_WIDTH * DAYS_PER_WEEK - 2, SEGEMENT_HEIGHT * SEGMENTS_PER_DAY - 2);
 
         g2d.setColor(Color.WHITE);
 
         for (SchoolDayComponent component : weekly_component) {
-            if (!component.isElementPresent(data, week)) continue;
+            if (component.isElementAbsent(data, week)) continue;
             drawSchoolDayComponent(image, g2d, component);
         }
         for (SchoolDayComponent component : kholle_component) {
-            if (!component.isElementPresent(data, week)) continue;
+            if (component.isElementAbsent(data, week)) continue;
             drawSchoolDayComponent(image, g2d, component);
         }
+
+        g2d.setFont(new Font(g2d.getFont().getName(), Font.BOLD, 30));
 
         for (SchoolDayComponent component : ds_component) {
-            if (!component.isElementPresent(data, week)) continue;
+            if (component.isElementAbsent(data, week)) continue;
             drawSchoolDayComponent(image, g2d, component);
         }
 
+        g2d.setColor(Color.BLACK);
+
+        g2d.setFont(new Font(g2d.getFont().getName(), Font.BOLD, 30));
+
+        drawCenteredString(g2d, WIDTH_OFFSET, 0, COLUMN_WIDTH, HEIGHT_OFFSET, "Lundi");
+        drawCenteredString(g2d, WIDTH_OFFSET + COLUMN_WIDTH, 0, COLUMN_WIDTH, HEIGHT_OFFSET, "Mardi");
+        drawCenteredString(g2d, WIDTH_OFFSET + 2 * COLUMN_WIDTH, 0, COLUMN_WIDTH, HEIGHT_OFFSET, "Mercredi");
+        drawCenteredString(g2d, WIDTH_OFFSET + 3 * COLUMN_WIDTH, 0, COLUMN_WIDTH, HEIGHT_OFFSET, "Jeudi");
+        drawCenteredString(g2d, WIDTH_OFFSET + 4 * COLUMN_WIDTH, 0, COLUMN_WIDTH, HEIGHT_OFFSET, "Vendredi");
+
+        g2d.setFont(new Font(g2d.getFont().getName(), Font.PLAIN, 20));
+
+        for (int i = 0; i <= SEGMENTS_PER_DAY; i++) {
+            int v = 8 + i;
+            drawCenteredString(g2d, 0, HEIGHT_OFFSET + i * SEGEMENT_HEIGHT - 20, WIDTH_OFFSET - 20, 40, (v < 10 ? " " + v : v + ""));
+            drawCenteredString(g2d, 30, HEIGHT_OFFSET + i * SEGEMENT_HEIGHT - 20, 20, 40, "H");
+        }
+
+        drawCenteredString(g2d, WIDTH_OFFSET, image.getHeight() - HEIGHT_OFFSET, image.getWidth() - 2 * WIDTH_OFFSET, HEIGHT_OFFSET, "Semaine : "+week);
+
         g2d.dispose();
-
-        JPanel comp = new JPanel() {
-            @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-
-                g.drawImage(image, 0, 0, null);
-            }
-        };
 
         return image;
     }
@@ -71,31 +97,33 @@ public class CalendarFrame {
 
     private static void initDS() {
 
-        ds_component.add(new SchoolDayComponent(13, 17, 2, "Devoir de Mathématique","","", Color.RED, Color.GREEN, (data, integer) -> integer == 2));
-        ds_component.add(new SchoolDayComponent(13, 17, 2, "Devoir de Physique","","", Color.RED, Color.GREEN, (data, integer) -> integer == 3));
-        ds_component.add(new SchoolDayComponent(15, 17, 4, "Devoir de Français","","", Color.RED, Color.GREEN, (data, integer) -> integer == 3));
-        ds_component.add(new SchoolDayComponent(13, 17, 2, "Devoir d'Informatique","","", Color.RED, Color.GREEN, (data, integer) -> integer == 4));
-        ds_component.add(new SchoolDayComponent(15, 17, 2, "LV1","","", Color.RED, Color.GREEN, (data, integer) -> integer == 4));
-        ds_component.add(new SchoolDayComponent(13, 17, 2, "Devoir d Mathématique","","", Color.RED, Color.GREEN, (data, integer) -> integer == 5));
-        ds_component.add(new SchoolDayComponent(13, 17, 2, "Devoir de Physique","","", Color.RED, Color.GREEN, (data, integer) -> integer == 6));
-        ds_component.add(new SchoolDayComponent(13, 17, 2, "Devoir d Mathématique","","", Color.RED, Color.GREEN, (data, integer) -> integer == 7));
-        ds_component.add(new SchoolDayComponent(13, 17, 2, "Devoir d'Informatique","","", Color.RED, Color.GREEN, (data, integer) -> integer == 8));
-        ds_component.add(new SchoolDayComponent(13, 17, 2, "Devoir d Mathématique","","", Color.RED, Color.GREEN, (data, integer) -> integer == 9));
-        ds_component.add(new SchoolDayComponent(13, 17, 2, "Devoir de Physique","","", Color.RED, Color.GREEN, (data, integer) -> integer == 10));
+        ds_component.add(new SchoolDayComponent(13, 17, 2, "Devoir \n de Mathématique", "", "", Color.decode("#b71540"), Color.BLACK, (data, integer) -> integer == 2));
+        ds_component.add(new SchoolDayComponent(13, 17, 2, "Devoir \n de Physique", "", "", Color.decode("#b71540"), Color.BLACK, (data, integer) -> integer == 3));
+        ds_component.add(new SchoolDayComponent(15, 17, 4, "Devoir \n de Français", "", "", Color.decode("#b71540"), Color.BLACK, (data, integer) -> integer == 3));
+        ds_component.add(new SchoolDayComponent(13, 17, 2, "Devoir \n d'Informatique", "", "", Color.decode("#b71540"), Color.BLACK, (data, integer) -> integer == 4));
+        ds_component.add(new SchoolDayComponent(13, 17, 4, "LV1", "", "", Color.decode("#b71540"), Color.BLACK, (data, integer) -> integer == 4));
+        ds_component.add(new SchoolDayComponent(13, 17, 2, "Devoir \n d Mathématique", "", "", Color.decode("#b71540"), Color.BLACK, (data, integer) -> integer == 5));
+        ds_component.add(new SchoolDayComponent(13, 17, 2, "Devoir \n de Physique", "", "", Color.decode("#b71540"), Color.BLACK, (data, integer) -> integer == 6));
+        ds_component.add(new SchoolDayComponent(13, 17, 2, "Devoir \n d Mathématique", "", "", Color.decode("#b71540"), Color.BLACK, (data, integer) -> integer == 7));
+        ds_component.add(new SchoolDayComponent(13, 17, 2, "Devoir \n d'Informatique", "", "", Color.decode("#b71540"), Color.BLACK, (data, integer) -> integer == 8));
+        ds_component.add(new SchoolDayComponent(13, 17, 2, "Devoir \n d Mathématique", "", "", Color.decode("#b71540"), Color.BLACK, (data, integer) -> integer == 9));
 
-        ds_component.add(new SchoolDayComponent(13, 17, 2, "Devoir d'Informatique","","", Color.RED, Color.GREEN, (data, integer) -> integer == 12));
-        ds_component.add(new SchoolDayComponent(13, 17, 2, "Devoir d Mathématique","","", Color.RED, Color.GREEN, (data, integer) -> integer == 13));
-        ds_component.add(new SchoolDayComponent(15, 17, 2, "Devoir de Français","","", Color.RED, Color.GREEN, (data, integer) -> integer == 14));
-        ds_component.add(new SchoolDayComponent(13, 17, 2, "Devoir de Physique","","", Color.RED, Color.GREEN, (data, integer) -> integer == 15));
-        ds_component.add(new SchoolDayComponent(15, 17, 2, "LV1","","", Color.RED, Color.GREEN, (data, integer) -> integer == 16));
-        ds_component.add(new SchoolDayComponent(13, 17, 2, "Devoir d Mathématique","","", Color.RED, Color.GREEN, (data, integer) -> integer == 17));
-        ds_component.add(new SchoolDayComponent(13, 17, 2, "Devoir d'Infomatique","","", Color.RED, Color.GREEN, (data, integer) -> integer == 18));
-        ds_component.add(new SchoolDayComponent(13, 17, 2, "Devoir de Physique","","", Color.RED, Color.GREEN, (data, integer) -> integer == 19));
-        ds_component.add(new SchoolDayComponent(13, 17, 2, "Devoir d Mathématique","","", Color.RED, Color.GREEN, (data, integer) -> integer == 20));
-        ds_component.add(new SchoolDayComponent(13, 17, 2, "Concours Blanc","Le bot dit certainement de la merde","", Color.RED, Color.GREEN, (data, integer) -> integer == 21));
+        ds_component.add(new SchoolDayComponent(13, 16, 2, "Mathématique", "M.Valleys", "G 05", MATH.getBack(), MATH.getWritten(), (data, integer) -> integer == 10));
 
-        ds_component.add(new SchoolDayComponent(13, 17, 2, "Devoir d Mathématique","","", Color.RED, Color.GREEN, (data, integer) -> integer == 24));
-        ds_component.add(new SchoolDayComponent(13, 17, 2, "Devoir d'Infomatique","","", Color.RED, Color.GREEN, (data, integer) -> integer == 25));
+        ds_component.add(new SchoolDayComponent(13, 17, 2, "Devoir \n de Physique", "", "", Color.decode("#b71540"), Color.BLACK, (data, integer) -> integer == 11));
+        ds_component.add(new SchoolDayComponent(13, 17, 2, "Devoir \n d'Informatique", "", "", Color.decode("#b71540"), Color.BLACK, (data, integer) -> integer == 12));
+        ds_component.add(new SchoolDayComponent(13, 17, 2, "Devoir \n d Mathématique", "", "", Color.decode("#b71540"), Color.BLACK, (data, integer) -> integer == 13));
+        ds_component.add(new SchoolDayComponent(15, 17, 2, "Devoir \n de Français", "", "", Color.decode("#b71540"), Color.BLACK, (data, integer) -> integer == 14));
+        ds_component.add(new SchoolDayComponent(13, 17, 2, "Devoir \n de Physique", "", "", Color.decode("#b71540"), Color.BLACK, (data, integer) -> integer == 15));
+        ds_component.add(new SchoolDayComponent(15, 17, 2, "LV1", "", "", Color.decode("#b71540"), Color.BLACK, (data, integer) -> integer == 16));
+        ds_component.add(new SchoolDayComponent(13, 17, 2, "Devoir \n d Mathématique", "", "", Color.decode("#b71540"), Color.BLACK, (data, integer) -> integer == 17));
+        ds_component.add(new SchoolDayComponent(13, 17, 2, "Devoir \n d'Infomatique", "", "", Color.decode("#b71540"), Color.BLACK, (data, integer) -> integer == 18));
+        ds_component.add(new SchoolDayComponent(13, 17, 2, "Devoir \n de Physique", "", "", Color.decode("#b71540"), Color.BLACK, (data, integer) -> integer == 19));
+        ds_component.add(new SchoolDayComponent(13, 17, 2, "Devoir \n d Mathématique", "", "", Color.decode("#b71540"), Color.BLACK, (data, integer) -> integer == 20));
+        ds_component.add(new SchoolDayComponent(13, 17, 2, "Concours Blanc", "Le bot dit certainement de la merde", "", Color.decode("#b71540"), Color.BLACK, (data, integer) -> integer == 21));
+
+        ds_component.add(new SchoolDayComponent(13, 17, 2, "Devoir \n d Mathématique", "", "", Color.decode("#b71540"), Color.BLACK, (data, integer) -> integer == 24));
+        ds_component.add(new SchoolDayComponent(13, 17, 2, "Devoir \n d'Infomatique", "", "", Color.decode("#b71540"), Color.BLACK, (data, integer) -> integer == 25));
 
 
     }
@@ -114,7 +142,7 @@ public class CalendarFrame {
 
                 String teacher = split[0];
                 String raw_day = split[1].substring(1);
-                int day = -1;
+                int day;
                 switch (raw_day) {
                     case "lun" -> day = 0;
                     case "mar" -> day = 1;
@@ -131,6 +159,8 @@ public class CalendarFrame {
 
                 int hour = Integer.parseInt(split[2].substring(0, 2));
 
+                String room = split[3].substring(0, split[3].length()-1).replace('_', ' ');
+
                 split = line.split("&");
                 split[split.length - 1] = split[split.length - 1].replace("\\\\", "");
 
@@ -138,9 +168,11 @@ public class CalendarFrame {
 
                 var ref = new Object() {
                     int[] groups = new int[0];
+                    int[] groupslv2 = new int[0];
                 };
 
                 ref.groups = new int[split.length];
+                ref.groupslv2 = new int[split.length];
                 for (int i = 0; i < split.length; i++) {
                     split[i] = StringUtils.deleteWhitespace(split[i]);
                     if (split[i].matches("\\Q{\\!\\!\\\\Esmall../..}")) {
@@ -148,15 +180,15 @@ public class CalendarFrame {
                         split[i] = split[i].replace("}", "");
                     }
                     if (split[i].isEmpty()) split[i] = null;
-                    ref.groups[i] = split[i] == null ? -1 : ((split[i].contains("/") ? -2 : Integer.parseInt(split[i])));
+                    ref.groups[i] = split[i] == null ? -1 : ((split[i].contains("/") ? Integer.parseInt(split[i].split("/")[0]) : Integer.parseInt(split[i])));
+                    if(split[i] != null && split[i].contains("/")) ref.groupslv2[i] = Integer.parseInt(split[i].split("/")[1]);
+                    else ref.groupslv2[i] = -1;
                 }
 
-                BiPredicate<UserData, Integer> khollePredicate = (userData, integer) -> {
-                    return integer >= 3 && ref.groups[integer - 3] == userData.getGroup();
-                };
+                BiPredicate<UserData, Integer> khollePredicate = (userData, integer) -> integer >= 3 && ref.groups[integer - 3] == userData.getGroup() || (ref.groupslv2[integer - 3] == userData.getGroup() && userData.getLv2());
 
-                kholle_component.add(new SchoolDayComponent(hour, hour + 1, day, "Kholle "+matiere, teacher, "?", Color.YELLOW, Color.BLACK, khollePredicate));
-            }else{
+                kholle_component.add(new SchoolDayComponent(hour, hour + 1, day, "Kholle " + matiere, teacher, room, KHOLLE_BACK_COLOR, Color.BLACK, khollePredicate));
+            } else {
                 matiere = line.replace("\\\\", "");
             }
             line = reader.readLine();
@@ -168,13 +200,11 @@ public class CalendarFrame {
 
     private static void initWeekly() {
 
-        BiPredicate<UserData, Integer> isForGroupOne = (userData, integer) -> {
-            return userData.getLast_name().compareTo("KUHN") <= 0 == (integer % 2 == 0);
-        };
+        BiPredicate<UserData, Integer> isForGroupOne = (userData, integer) -> userData.getLast_name().compareTo("KUHN") <= 0 == (integer % 2 == 0);
 
-        BiPredicate<UserData, Integer> isForGroupTwo = (userData, integer) -> {
-            return !isForGroupOne.test(userData, integer);
-        };
+        BiPredicate<UserData, Integer> isForGroupTwo = (userData, integer) -> !isForGroupOne.test(userData, integer);
+
+        BiPredicate<UserData, Integer> isLv2 = (data, integer) -> data.getLv2();
 
 
         //MONDAY
@@ -189,7 +219,7 @@ public class CalendarFrame {
         //TUESDAY
         weekly_component.add(MATH.toComponent(8, 10, 1));
         weekly_component.add(PHYSIQUE.toComponent(10, 12, 1));
-        weekly_component.add(LV2.toComponent(12, 13, 1));
+        weekly_component.add(LV2.toComponent(12, 13, 1, isLv2));
 
         weekly_component.add(MATH.toComponent(14, 16, 1));
         weekly_component.add(TIPE.toComponent(16, 18, 1));
@@ -202,12 +232,12 @@ public class CalendarFrame {
         weekly_component.add(MATH.toComponent(8, 10, 3));
         weekly_component.add(INFO.toComponent(10, 12, 3));
 
-        weekly_component.add(MATH.toComponent(14, 15, 3));
+        weekly_component.add(MATH.toComponent(13, 15, 3));
         weekly_component.add(INFO.toComponent(15, 16, 3, isForGroupTwo));
         weekly_component.add(INFO.toComponent(16, 17, 3, isForGroupOne));
         weekly_component.add(PHYSIQUE.toComponent(15, 16, 3, isForGroupOne));
         weekly_component.add(PHYSIQUE.toComponent(16, 17, 3, isForGroupTwo));
-        weekly_component.add(LV2.toComponent(17, 18, 3));
+        weekly_component.add(LV2.toComponent(17, 18, 3, isLv2));
 
         //FRIDAY
         weekly_component.add(PHYSIQUE.toComponent(8, 10, 4));
@@ -218,14 +248,45 @@ public class CalendarFrame {
 
 
     private static void drawSchoolDayComponent(BufferedImage image, Graphics2D g2d, SchoolDayComponent component) {
-        int x = component.getDay() * COLUMN_WIDTH;
-        double y = ((component.getBegin() - 8) / 12 * image.getHeight());
-        float height = ((component.getEnd() - component.getBegin()) * ELEMENT_HEIGHT);
+        int x = WIDTH_OFFSET + component.getDay() * COLUMN_WIDTH;
+        double y = HEIGHT_OFFSET + ((component.getBegin() - 8) * SEGEMENT_HEIGHT);
+        float height = ((component.getEnd() - component.getBegin()) * SEGEMENT_HEIGHT);
 
-        g2d.setColor(component.getBack());
+
+        g2d.setColor(Color.BLACK);
         g2d.fillRect(x, (int) y, COLUMN_WIDTH, (int) height);
+
+
+        g2d.setColor(component.getBack().brighter());
+        g2d.fillRect(x + 1, (int) y + 1, COLUMN_WIDTH - 2, (int) height - 2);
         g2d.setColor(component.getWritten());
-        g2d.drawString(component.getName(), x + 10, (int) (y + height / 3));
-        g2d.drawString(component.getRoom() + " " + component.getTeacher(), x + 10, (int) (y + 2 * height / 3));
+
+        String extra = "";
+        if (!component.getRoom().isEmpty()) extra += component.getRoom();
+        if (!component.getRoom().isEmpty() && !component.getTeacher().isEmpty()) extra += " ";
+        if (!component.getTeacher().isEmpty()) extra += component.getTeacher();
+
+        drawCenteredString(g2d, x, (int) y, COLUMN_WIDTH, (int) height,
+                component.getName() + (extra.isEmpty() ? "" : "\n" + extra)
+        );
+    }
+
+
+    private static void drawCenteredString(Graphics g, int x, int y, int width, int height, String text) {
+        // Get the FontMetrics
+        FontMetrics metrics = g.getFontMetrics(g.getFont());
+        // Determine the X coordinate for the text
+        String[] split = text.split("\n");
+        for (int i = 0; i < split.length; i++) {
+
+            String line = split[i];
+
+            int newx = x + (width - metrics.stringWidth(line)) / 2;
+            int newy = y + (i * (metrics.getHeight())) + ((height - (split.length) * metrics.getHeight()) / 2) + metrics.getAscent();
+
+            g.drawString(line, newx, newy);
+
+        }
+
     }
 }

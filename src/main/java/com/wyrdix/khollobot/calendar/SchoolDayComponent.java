@@ -89,20 +89,20 @@ public final class SchoolDayComponent {
         return day;
     }
 
-    public boolean isElementPresent(UserData data, int week) {
-        return isElementPresent.test(data, week);
+    public boolean isElementAbsent(UserData data, int week) {
+        return !isElementPresent.test(data, week);
     }
 
     public enum Type {
-        FRANCAIS("Français", "M. Caffier", "G05"),
-        INFO("Informatique", "Mme.Montfleur", "G05", Color.GREEN, Color.BLACK),
+        FRANCAIS("Français", "M. Caffier", "G05", Color.decode("#f6b93b"), Color.BLACK),
+        INFO("Informatique", "Mme.Montfleur", "G05", Color.decode("#b8e994"), Color.BLACK),
         LV1("LV1", "Prof de LV1", "Anglais G05"),
         LV2("LV2", "Prof de LV2", ""),
-        MATH("Mathematique", "M.Valleys", "G05", Color.RED, Color.BLACK),
-        PHYSIQUE("Physique", "M.Cousin", "G05", Color.BLUE, Color.BLACK),
+        MATH("Mathematique", "M.Valleys", "G05", Color.decode("#e55039"), Color.BLACK),
+        PHYSIQUE("Physique", "M.Cousin", "G05", Color.decode("#82ccdd"), Color.BLACK),
         TIPE("Tipe", "", "G05 + S1012"),
-        TP_INFO("TP Info", "Mme.Montfleur", "S1012", Color.MAGENTA, Color.BLACK),
-        TP_PHYSIQUE("TP Physique", "M.Cousin", "", Color.CYAN, Color.BLACK);
+        TP_INFO("TP Info", "Mme.Montfleur", "S1012", Color.decode("#78e08f"), Color.BLACK),
+        TP_PHYSIQUE("TP Physique", "M.Cousin", "", Color.decode("#3c6382"), Color.BLACK);
 
         private final String name;
         private final String teacher;

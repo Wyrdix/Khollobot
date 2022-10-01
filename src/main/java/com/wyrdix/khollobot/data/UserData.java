@@ -8,6 +8,7 @@ import com.wyrdix.data.utils.JsonOptional;
 public class UserData extends DataJsonNode {
 
     private final long id_long;
+    private boolean lv2;
     private final String discord_name;
     private String first_name;
     private String last_name;
@@ -24,6 +25,7 @@ public class UserData extends DataJsonNode {
         last_name = object.get("second_name").getAsString();
         group = object.get("group").getAsInt();
         dmMail = JsonOptional.ofNullable(object.get("dm_mail")).map(JsonElement::getAsBoolean).orElse(false);
+        lv2 = JsonOptional.ofNullable(object.get("lv2")).map(JsonElement::getAsBoolean).orElse(true);
     }
 
     public UserData(long id_long, String discord_name) {
@@ -58,6 +60,7 @@ public class UserData extends DataJsonNode {
         collect.addProperty("second_name", last_name);
         collect.addProperty("group", group);
         collect.addProperty("dm_mail", dmMail);
+        collect.addProperty("lv2", lv2);
 
 
         return collect;
@@ -102,5 +105,13 @@ public class UserData extends DataJsonNode {
 
     public boolean getDmMail() {
         return dmMail;
+    }
+
+    public boolean getLv2() {
+        return lv2;
+    }
+
+    public void setLv2(boolean lv2) {
+        this.lv2 = lv2;
     }
 }
