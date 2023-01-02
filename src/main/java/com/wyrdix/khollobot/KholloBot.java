@@ -147,11 +147,11 @@ public class KholloBot {
                         if (messageEmbed == null) return;
 
                         File datafolder = new File("data/mail_" + last);
-                        datafolder.mkdir();
+                        datafolder.mkdirs();
 
                         List<String> names = downloadAttachments(datafolder, message);
 
-                        List<File> files = names.stream().map(s -> new File("data/mail_" + last + "/" + s)).toList();
+                        List<File> files = names.stream().map(s -> new File(datafolder, s)).toList();
 
                         List<FileUpload> uploads = files.stream().map(FileUpload::fromData).toList();
 
@@ -212,7 +212,7 @@ public class KholloBot {
             if (Part.ATTACHMENT.equalsIgnoreCase(part.getDisposition())) {
                 String file = part.getFileName();
                 if (part.getSize() >= 10000000) continue;
-                part.saveFile(name.toPath() + File.separator + part.getFileName());
+                part.saveFile(new File(name, file).getPath());
                 downloadedAttachments.add(file);
             }
         }
