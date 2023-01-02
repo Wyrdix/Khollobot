@@ -46,21 +46,9 @@ public class KholloBot {
     public static void main(String[] args) {
         InputStream loginStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("login.json");
         if (loginStream == null) {
-            System.out.println("Could not load login informations");
-            return;
-        } else {
             LOGIN_FILE = new File("login.json");
-            try {
-                if (LOGIN_FILE.createNewFile()) {
-                    try {
-                        //noinspection UnstableApiUsage
-                        Files.write(loginStream.readAllBytes(), LOGIN_FILE);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+            if(!LOGIN_FILE.exists()){
+                System.err.println("Problem loading login data");
             }
             try {
                 loginStream = new FileInputStream(LOGIN_FILE);
