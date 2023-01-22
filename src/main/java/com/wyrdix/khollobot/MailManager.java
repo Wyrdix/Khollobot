@@ -4,7 +4,6 @@ import com.google.gson.JsonObject;
 
 import javax.mail.*;
 import javax.mail.internet.MimeMultipart;
-import javax.naming.spi.StateFactory;
 import java.io.IOException;
 import java.util.Optional;
 import java.util.Properties;

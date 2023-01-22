@@ -1,14 +1,12 @@
 package com.wyrdix.khollobot.data;
 
 import com.google.common.io.Files;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.wyrdix.data.json.DataJsonNode;
 import com.wyrdix.khollobot.KholloBot;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 
 public class LoginData extends DataJsonNode {
 

@@ -1,7 +1,6 @@
 package com.wyrdix.khollobot.calendar;
 
 import com.wyrdix.khollobot.data.UserData;
-import org.apache.commons.lang3.StringUtils;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -115,15 +114,15 @@ public class CalendarFrame {
         ds_component.add(new SchoolDayComponent(13, 17, 2, "Devoir \n d Mathématique", "", "", Color.decode("#b71540"), Color.BLACK, (data, integer) -> integer == 13));
         ds_component.add(new SchoolDayComponent(15, 17, 2, "Devoir \n de Français", "", "", Color.decode("#b71540"), Color.BLACK, (data, integer) -> integer == 14));
         ds_component.add(new SchoolDayComponent(13, 17, 2, "Devoir \n de Physique", "", "", Color.decode("#b71540"), Color.BLACK, (data, integer) -> integer == 15));
-        ds_component.add(new SchoolDayComponent(15, 17, 2, "LV1", "", "", Color.decode("#b71540"), Color.BLACK, (data, integer) -> integer == 16));
-        ds_component.add(new SchoolDayComponent(13, 17, 2, "Devoir \n d Mathématique", "", "", Color.decode("#b71540"), Color.BLACK, (data, integer) -> integer == 17));
-        ds_component.add(new SchoolDayComponent(13, 17, 2, "Devoir \n d'Infomatique", "", "", Color.decode("#b71540"), Color.BLACK, (data, integer) -> integer == 18));
-        ds_component.add(new SchoolDayComponent(13, 17, 2, "Devoir \n de Physique", "", "", Color.decode("#b71540"), Color.BLACK, (data, integer) -> integer == 19));
-        ds_component.add(new SchoolDayComponent(13, 17, 2, "Devoir \n d Mathématique", "", "", Color.decode("#b71540"), Color.BLACK, (data, integer) -> integer == 20));
-        ds_component.add(new SchoolDayComponent(13, 17, 2, "Concours Blanc", "Le bot dit certainement de la merde", "", Color.decode("#b71540"), Color.BLACK, (data, integer) -> integer == 21));
+        ds_component.add(new SchoolDayComponent(13, 17, 4, "LV1", "", "", Color.decode("#b71540"), Color.BLACK, (data, integer) -> integer == 15));
+        ds_component.add(new SchoolDayComponent(13, 17, 2, "Devoir \n d Mathématique", "", "", Color.decode("#b71540"), Color.BLACK, (data, integer) -> integer == 16));
+        ds_component.add(new SchoolDayComponent(13, 17, 2, "Devoir \n d'Infomatique", "", "", Color.decode("#b71540"), Color.BLACK, (data, integer) -> integer == 17));
+        ds_component.add(new SchoolDayComponent(13, 17, 2, "Devoir \n de Physique", "", "", Color.decode("#b71540"), Color.BLACK, (data, integer) -> integer == 18));
+        ds_component.add(new SchoolDayComponent(13, 17, 2, "Devoir \n d Mathématique", "", "", Color.decode("#b71540"), Color.BLACK, (data, integer) -> integer == 19));
+        ds_component.add(new SchoolDayComponent(13, 17, 2, "Concours Blanc", "Le bot dit certainement de la merde", "", Color.decode("#b71540"), Color.BLACK, (data, integer) -> integer == 20));
 
-        ds_component.add(new SchoolDayComponent(13, 17, 2, "Devoir \n d Mathématique", "", "", Color.decode("#b71540"), Color.BLACK, (data, integer) -> integer == 24));
-        ds_component.add(new SchoolDayComponent(13, 17, 2, "Devoir \n d'Infomatique", "", "", Color.decode("#b71540"), Color.BLACK, (data, integer) -> integer == 25));
+        ds_component.add(new SchoolDayComponent(13, 17, 2, "Devoir \n d Mathématique", "", "", Color.decode("#b71540"), Color.BLACK, (data, integer) -> integer == 21));
+        ds_component.add(new SchoolDayComponent(13, 17, 2, "Devoir \n d'Infomatique", "", "", Color.decode("#b71540"), Color.BLACK, (data, integer) -> integer == 22));
 
 
     }
@@ -174,7 +173,7 @@ public class CalendarFrame {
                 ref.groups = new int[split.length];
                 ref.groupslv2 = new int[split.length];
                 for (int i = 0; i < split.length; i++) {
-                    split[i] = StringUtils.deleteWhitespace(split[i]);
+                    split[i] = deleteWhitespace(split[i]);
                     if (split[i].matches("\\Q{\\!\\!\\\\Esmall../..}")) {
                         split[i] = split[i].replace("{\\!\\!\\small", "");
                         split[i] = split[i].replace("}", "");
@@ -198,9 +197,30 @@ public class CalendarFrame {
 
     }
 
+    public static String deleteWhitespace(final String str) {
+        if (str == null || str.isEmpty()) {
+            return str;
+        }
+        final int sz = str.length();
+        final char[] chs = new char[sz];
+        int count = 0;
+        for (int i = 0; i < sz; i++) {
+            if (!Character.isWhitespace(str.charAt(i))) {
+                chs[count++] = str.charAt(i);
+            }
+        }
+        if (count == sz) {
+            return str;
+        }
+        if (count == 0) {
+            return "";
+        }
+        return new String(chs, 0, count);
+    }
+
     private static void initWeekly() {
 
-        BiPredicate<UserData, Integer> isForGroupOne = (userData, integer) -> userData.getLast_name().compareTo("KUHN") <= 0 == (integer % 2 == 0);
+        BiPredicate<UserData, Integer> isForGroupOne = (userData, integer) -> (userData.getLast_name().compareTo("KUHN") <= 0 == (integer % 2 == 0));
 
         BiPredicate<UserData, Integer> isForGroupTwo = (userData, integer) -> !isForGroupOne.test(userData, integer);
 
@@ -209,8 +229,8 @@ public class CalendarFrame {
 
         //MONDAY
 
-        weekly_component.add(TP_INFO.toComponent(8, 11, 0, isForGroupTwo));
-        weekly_component.add(TP_PHYSIQUE.toComponent(8, 11, 0, isForGroupOne));
+        weekly_component.add(TP_INFO.toComponent(8, 11, 0, isForGroupTwo.negate()));
+        weekly_component.add(TP_PHYSIQUE.toComponent(8, 11, 0, isForGroupOne.negate()));
         weekly_component.add(PHYSIQUE.toComponent(11, 12, 0));
 
         weekly_component.add(INFO.toComponent(14, 15, 0));

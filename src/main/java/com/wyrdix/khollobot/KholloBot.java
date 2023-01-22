@@ -30,6 +30,7 @@ import net.dv8tion.jda.api.utils.FileUpload;
 import javax.imageio.ImageIO;
 import javax.mail.*;
 import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeUtility;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.ArrayList;
@@ -62,9 +63,9 @@ public class KholloBot {
         LOGIN_DATA = new LoginData(loginObject);
 
         try {
-            jda = JDABuilder.createDefault(LOGIN_DATA.getToken())
+            jda = JDABuilder.createLight(LOGIN_DATA.getToken())
                     .setChunkingFilter(ChunkingFilter.ALL) // enable member chunking for all guilds
-                    .enableIntents(GatewayIntent.DIRECT_MESSAGE_REACTIONS)
+                    .enableIntents(GatewayIntent.DIRECT_MESSAGE_REACTIONS, GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MEMBERS)
                     .build();
         } catch (Exception e) {
             e.printStackTrace();
@@ -121,7 +122,7 @@ public class KholloBot {
                             for (File file : files) {
                                 if (!file.getName().startsWith("mail_")) continue;
                                 String raw = file.getName().substring(5);
-                                if (last - Long.parseLong(raw) < 10000) continue;
+                                if (last - Long.parseLong(raw) < 600000) continue;
 
                                 delete(file);
                             }
@@ -210,9 +211,12 @@ public class KholloBot {
         for (int partCount = 0; partCount < numberOfParts; partCount++) {
             MimeBodyPart part = (MimeBodyPart) multiPart.getBodyPart(partCount);
             if (Part.ATTACHMENT.equalsIgnoreCase(part.getDisposition())) {
-                String file = part.getFileName();
+                String file = MimeUtility.decodeText(part.getFileName());
                 if (part.getSize() >= 10000000) continue;
-                part.saveFile(new File(name, file).getPath());
+                File[] files = name.listFiles();
+                String[] split = (file+"\\").split("\\\\");
+                String fileName = (String) split[split.length-1];
+                part.saveFile(new File(name, fileName));
                 downloadedAttachments.add(file);
             }
         }
@@ -227,8 +231,7 @@ public class KholloBot {
 
         if (from.contains("no-reply@accounts.google.com")) return null;
 
-        line = line.replaceFirst("Le (\\n|.)*\\.(\\n|.)*à(\\n|.)*", "");
-        line = (line + "a écrit:").split("a écrit:")[0];
+        line = line.replaceAll("Le.*?écrit:.*?--End of Post--", "");
 
         line = line.substring(0, Math.min(line.length(), 4000));
 
@@ -328,10 +331,14 @@ public class KholloBot {
         Button button = event.getButton();
         if (button.getId() == null || !button.getId().startsWith("khollobot_week_")) return;
         Message.Interaction reference = event.getMessage().getInteraction();
-        System.out.println(reference);
         if (reference == null || reference.getUser().getIdLong() != event.getInteraction().getUser().getIdLong()) {
             event.reply("Vous ne pouvez pas modifier cette demande").complete().setEphemeral(true);
             return;
+        }
+
+        try {
+            event.reply("Actualisé").complete();
+        } catch (Throwable ignored) {
         }
 
         int week = Integer.parseInt(button.getId().substring("khollobot_week_".length()));
@@ -356,12 +363,12 @@ public class KholloBot {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
         FileUpload upload = FileUpload.fromData(file);
 
         //noinspection ResultOfMethodCallIgnored
         event.getMessage().editMessageAttachments(upload).setActionRow(generateButton(week)).queue((s) -> file.delete());
 
-        event.reply("Actualisé").queue();
 
         for (Message message : event.getChannel().getIterableHistory()) {
             if (message.getContentRaw().equals("Actualisé")) {
