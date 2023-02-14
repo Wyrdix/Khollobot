@@ -3,9 +3,16 @@ package com.wyrdix.khollobot.calendar;
 import com.wyrdix.khollobot.data.UserData;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.function.BiPredicate;
 
 public final class SchoolDayComponent {
+
+    private boolean isItASpecialDay(int week){
+        return week == 20 && day <= 2;
+    }
 
     private final float begin;
     private final float end;
@@ -27,7 +34,7 @@ public final class SchoolDayComponent {
         this.begin = begin;
         this.end = end;
         this.day = day;
-        this.isElementPresent = isElementPresent;
+        this.isElementPresent = isElementPresent.and((data, integer) -> !isItASpecialDay(integer));
     }
 
     public SchoolDayComponent(float begin, float end, int day, String name, String teacher, String room, Color back, Color written, BiPredicate<UserData, Integer> isElementPresent) {

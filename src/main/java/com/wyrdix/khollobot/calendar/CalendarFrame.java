@@ -119,11 +119,17 @@ public class CalendarFrame {
         ds_component.add(new SchoolDayComponent(13, 17, 2, "Devoir \n d'Infomatique", "", "", Color.decode("#b71540"), Color.BLACK, (data, integer) -> integer == 17));
         ds_component.add(new SchoolDayComponent(13, 17, 2, "Devoir \n de Physique", "", "", Color.decode("#b71540"), Color.BLACK, (data, integer) -> integer == 18));
         ds_component.add(new SchoolDayComponent(13, 17, 2, "Devoir \n d Mathématique", "", "", Color.decode("#b71540"), Color.BLACK, (data, integer) -> integer == 19));
-        ds_component.add(new SchoolDayComponent(13, 17, 2, "Concours Blanc", "Le bot dit certainement de la merde", "", Color.decode("#b71540"), Color.BLACK, (data, integer) -> integer == 20));
+        //ds_component.add(new SchoolDayComponent(13, 17, 2, "Concours Blanc", "Le bot dit certainement de la merde", "", Color.decode("#b71540"), Color.BLACK, (data, integer) -> integer == 20));
 
         ds_component.add(new SchoolDayComponent(13, 17, 2, "Devoir \n d Mathématique", "", "", Color.decode("#b71540"), Color.BLACK, (data, integer) -> integer == 21));
         ds_component.add(new SchoolDayComponent(13, 17, 2, "Devoir \n d'Infomatique", "", "", Color.decode("#b71540"), Color.BLACK, (data, integer) -> integer == 22));
 
+        ds_component.add(new SchoolDayComponent(8, 12, 0, "Concours Blanc \n Mathématique 1", "", "", MATH.getBack(), MATH.getWritten(), (data, integer) -> integer == 20));
+        ds_component.add(new SchoolDayComponent(13, 17, 0, "Concours Blanc \n LV1", "", "", LV1.getBack(), LV1.getWritten(), (data, integer) -> integer == 20));
+        ds_component.add(new SchoolDayComponent(8, 12, 1, "Concours Blanc \n Physique", "", "", PHYSIQUE.getBack(), PHYSIQUE.getWritten(), (data, integer) -> integer == 20));
+        ds_component.add(new SchoolDayComponent(13, 17, 1, "Concours Blanc \n Informatique", "", "", INFO.getBack(), INFO.getWritten(), (data, integer) -> integer == 20));
+        ds_component.add(new SchoolDayComponent(8, 12, 2, "Concours Blanc \n Français", "", "", FRANCAIS.getBack(), FRANCAIS.getWritten(), (data, integer) -> integer == 20));
+        ds_component.add(new SchoolDayComponent(13, 17, 2, "Concours Blanc \n Mathématique 2", "", "", MATH.getBack(), MATH.getWritten(), (data, integer) -> integer == 20));
 
     }
 
