@@ -5,7 +5,6 @@ import com.wyrdix.khollobot.plugin.DefaultPlugin;
 import com.wyrdix.khollobot.plugin.Plugin;
 import com.wyrdix.khollobot.plugin.PluginInfo;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
 public class PluginsCommand extends KCommandImpl {
