@@ -19,6 +19,10 @@ dependencies {
 
 }
 
+tasks.compileJava {
+    options.encoding = "UTF-8"
+}
+
 tasks.withType<Jar> {
     manifest {
         attributes["Main-Class"] = "com.wyrdix.khollobot.KholloBot"
