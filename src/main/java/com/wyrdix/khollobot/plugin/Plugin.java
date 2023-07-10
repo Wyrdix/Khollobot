@@ -2,6 +2,7 @@ package com.wyrdix.khollobot.plugin;
 
 import com.wyrdix.khollobot.GlobalConfig;
 import com.wyrdix.khollobot.KholloBot;
+import com.wyrdix.khollobot.command.KCommand;
 import net.dv8tion.jda.api.JDA;
 
 public interface Plugin {
@@ -11,6 +12,10 @@ public interface Plugin {
 
     default boolean isEnable() {
         return GlobalConfig.getGlobalConfig().getConfig(getClass()).isEnabled();
+    }
+
+    default void addCommand(KCommand command){
+        command.fillCommand(getJda().upsertCommand(command.getData())).queue();
     }
 
     default JDA getJda() {

@@ -7,7 +7,7 @@ public class DefaultPlugin implements Plugin {
 
     @Override
     public void onEnable() {
-        getJda().upsertCommand(PluginsCommand.getInstance().getData()).queue();
+        addCommand(PluginsCommand.getInstance());
     }
 
     @Override
