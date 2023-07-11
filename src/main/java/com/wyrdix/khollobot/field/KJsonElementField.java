@@ -27,7 +27,7 @@ public class KJsonElementField extends KField<JsonElement> {
     }
 
     private JsonObject getDirectParent(JsonObject object, String path) {
-        if (path.contains(".")) return object;
+        if (!path.contains(".")) return object;
         String value = path.substring(0, path.indexOf('.'));
         String rec = path.substring(path.indexOf('.') + 1);
 
