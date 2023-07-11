@@ -1,5 +1,8 @@
 {
   "default": {
     "enabled": true
+  },
+  "id": {
+    "enabled": true
   }
 }
