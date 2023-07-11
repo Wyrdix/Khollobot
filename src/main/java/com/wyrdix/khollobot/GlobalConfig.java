@@ -1,6 +1,9 @@
 package com.wyrdix.khollobot;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 import com.wyrdix.khollobot.plugin.Plugin;
 import com.wyrdix.khollobot.plugin.PluginInfo;
 
@@ -14,9 +17,9 @@ import java.util.Map;
 public class GlobalConfig {
 
     private static GlobalConfig INSTANCE = null;
-    private JsonObject config;
+    private final JsonObject config;
 
-    private Map<String, Plugin.PluginConfig> configMap = new HashMap<>();
+    private final Map<String, Plugin.PluginConfig> configMap = new HashMap<>();
 
     public GlobalConfig(JsonObject config) {
 
@@ -30,7 +33,7 @@ public class GlobalConfig {
             assert inputStream != null;
             InputStreamReader streamReader = new InputStreamReader(inputStream);
 
-            System.out.println("Loading login resource file, may be located at : " + new File("global.json").getAbsolutePath());
+            System.out.println("Loading global config resource file, may be located at : " + new File("global.json").getAbsolutePath());
 
             try {
                 INSTANCE = new GlobalConfig(new Gson().fromJson(streamReader, JsonObject.class));
