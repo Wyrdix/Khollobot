@@ -11,7 +11,7 @@ import java.util.Calendar;
 @PluginInfo(id = "id", name = "Identifiant", version = "1.0-SNAPSHOT", author = "Wyrdix")
 public class IdentityPlugin implements Plugin {
 
-    public static final KField<String> FIRST_NAME = new KJsonStringField("user.first_name"){
+    public static final KField<String> FIRST_NAME = new KJsonStringField("id.first_name"){
         @Override
         public String sanitize(String value) {
             String lower = value.toLowerCase();
@@ -19,14 +19,14 @@ public class IdentityPlugin implements Plugin {
             return c + lower.substring(1);
         }
     };
-    public static final KField<String> LAST_NAME = new KJsonStringField("user.last_name"){
+    public static final KField<String> LAST_NAME = new KJsonStringField("id.last_name"){
         @Override
         public String sanitize(String value) {
             return value.toUpperCase();
         }
     };
 
-    public static final KField<Calendar> BIRTH_DATE = new KJsonCalendarField("user.birth_date");
+    public static final KField<Calendar> BIRTH_DATE = new KJsonCalendarField("id.birth_date");
 
     @Override
     public void onEnable() {
