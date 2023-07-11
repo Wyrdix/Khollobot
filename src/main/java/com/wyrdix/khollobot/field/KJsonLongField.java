@@ -7,7 +7,7 @@ import com.wyrdix.khollobot.KUser;
 import java.io.IOException;
 import java.util.Optional;
 
-class KJsonLongField extends KField<Long> {
+public class KJsonLongField extends KField<Long> {
 
     private final KJsonElementField jsonElementField;
 

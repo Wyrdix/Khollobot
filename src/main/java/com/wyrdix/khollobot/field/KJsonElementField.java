@@ -4,7 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.wyrdix.khollobot.KUser;
 
-class KJsonElementField extends KField<JsonElement> {
+public class KJsonElementField extends KField<JsonElement> {
 
     private final String path;
 
