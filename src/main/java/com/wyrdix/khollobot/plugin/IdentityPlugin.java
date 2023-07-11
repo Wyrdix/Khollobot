@@ -1,7 +1,7 @@
 package com.wyrdix.khollobot.plugin;
 
-import com.wyrdix.khollobot.command.BirthCommand;
-import com.wyrdix.khollobot.command.IdCommand;
+import com.wyrdix.khollobot.command.id.BirthCommand;
+import com.wyrdix.khollobot.command.id.IdCommand;
 import com.wyrdix.khollobot.field.KField;
 import com.wyrdix.khollobot.field.KJsonCalendarField;
 import com.wyrdix.khollobot.field.KJsonStringField;

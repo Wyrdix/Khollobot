@@ -1,6 +1,7 @@
-package com.wyrdix.khollobot.command;
+package com.wyrdix.khollobot.command.id;
 
 import com.wyrdix.khollobot.KUser;
+import com.wyrdix.khollobot.command.KCommandImpl;
 import com.wyrdix.khollobot.plugin.DefaultPlugin;
 import com.wyrdix.khollobot.plugin.IdentityPlugin;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;

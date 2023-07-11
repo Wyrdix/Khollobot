@@ -1,6 +1,7 @@
-package com.wyrdix.khollobot.command;
+package com.wyrdix.khollobot.command.def;
 
 import com.wyrdix.khollobot.KholloBot;
+import com.wyrdix.khollobot.command.KCommandImpl;
 import com.wyrdix.khollobot.plugin.DefaultPlugin;
 import com.wyrdix.khollobot.plugin.Plugin;
 import com.wyrdix.khollobot.plugin.PluginInfo;
