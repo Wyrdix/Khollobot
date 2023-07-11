@@ -3,14 +3,16 @@ package com.wyrdix.khollobot.command;
 import com.wyrdix.khollobot.KholloBot;
 import com.wyrdix.khollobot.plugin.Plugin;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
 public class KCommandImpl implements KCommand {
 
     private final String id;
     private final String description;
     private final Plugin plugin;
+
+    private Long registered_id = null;
 
     public KCommandImpl(Plugin plugin, String id, String description) {
         this.id = id;
@@ -29,7 +31,7 @@ public class KCommandImpl implements KCommand {
     }
 
     @Override
-    public CommandData getData() {
+    public SlashCommandData getData() {
         return Commands.slash(id, description);
     }
 
@@ -41,6 +43,20 @@ public class KCommandImpl implements KCommand {
     @Override
     public Plugin plugin() {
         return plugin;
+    }
+
+    @Override
+    public long getRegisteredId() {
+        if(registered_id == null) throw new RuntimeException("Could not get registered id as this command isn't registered yet");
+        return registered_id;
+    }
+
+    @Override
+    public void setRegisteredId(long idLong) {
+        if(this.registered_id != null) throw new RuntimeException("This Command is already registered");
+        this.registered_id = idLong;
+
+        COMMAND_MAP_BY_ID.put(idLong, this);
     }
 
     @Override

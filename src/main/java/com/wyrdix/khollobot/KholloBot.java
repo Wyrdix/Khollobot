@@ -3,6 +3,7 @@ package com.wyrdix.khollobot;
 
 import com.wyrdix.khollobot.command.KCommand;
 import com.wyrdix.khollobot.plugin.DefaultPlugin;
+import com.wyrdix.khollobot.plugin.IdentityPlugin;
 import com.wyrdix.khollobot.plugin.Plugin;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -25,18 +26,25 @@ public class KholloBot {
         setJDA(JDABuilder.createDefault(LoginConfig.getLogin().getDiscordToken()).build());
 
         addPlugin(new DefaultPlugin());
+        addPlugin(new IdentityPlugin());
 
         getJDA().addEventListener(new ListenerAdapter() {
             @Override
             public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
-                String commandId = event.getInteraction().getCommandString().substring(1);
+                long commandId = event.getCommandIdLong();
 
-                KCommand command = KCommand.COMMAND_MAP.get(commandId);
+                KCommand command = KCommand.COMMAND_MAP_BY_ID.get(commandId);
                 if (command != null) command.execute(event);
             }
         });
 
         PLUGIN_MAP.values().stream().filter(Plugin::isEnable).forEach(Plugin::onEnable);
+        getJDA().updateCommands().addCommands(KCommand.COMMAND_MAP.values().stream().map(KCommand::getData).toList()).queue(a->a.forEach(s->{
+            String name = s.getFullCommandName();
+            long id = s.getIdLong();
+
+            KCommand.COMMAND_MAP_BY_ID.put(id, KCommand.COMMAND_MAP.getOrDefault(name, null));
+        }));
     }
 
     private static void addPlugin(Plugin plugin) {

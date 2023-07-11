@@ -15,7 +15,7 @@ public interface Plugin {
     }
 
     default void addCommand(KCommand command){
-        command.fillCommand(getJda().upsertCommand(command.getData())).queue();
+
     }
 
     default JDA getJda() {
