@@ -1,8 +1,12 @@
 package com.wyrdix.khollobot.plugin;
 
+import com.wyrdix.khollobot.command.BirthCommand;
 import com.wyrdix.khollobot.command.IdCommand;
 import com.wyrdix.khollobot.field.KField;
+import com.wyrdix.khollobot.field.KJsonCalendarField;
 import com.wyrdix.khollobot.field.KJsonStringField;
+
+import java.util.Calendar;
 
 @PluginInfo(id = "id", name = "Identifiant", version = "1.0-SNAPSHOT", author = "Wyrdix")
 public class IdentityPlugin implements Plugin {
@@ -22,9 +26,12 @@ public class IdentityPlugin implements Plugin {
         }
     };
 
+    public static final KField<Calendar> BIRTH_DATE = new KJsonCalendarField("user.birth_date");
+
     @Override
     public void onEnable() {
         addCommand(IdCommand.getInstance());
+        addCommand(BirthCommand.getInstance());
     }
 
     @Override
