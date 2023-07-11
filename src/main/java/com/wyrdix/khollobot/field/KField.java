@@ -10,4 +10,8 @@ public abstract class KField<T> {
 
     public abstract void set(KUser user, T value);
 
+    public T sanitize(T value){
+        return value;
+    }
+
 }

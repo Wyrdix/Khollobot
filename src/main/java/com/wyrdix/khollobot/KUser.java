@@ -4,8 +4,12 @@ import com.google.gson.Gson;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
+import com.wyrdix.khollobot.field.KField;
 
-import java.io.*;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -13,11 +17,6 @@ public class KUser {
 
     private static final Map<Long, KUser> KUSER_MAP = new TreeMap<>();
     private final long discord_id;
-
-    public JsonObject getData() {
-        return data;
-    }
-
     private JsonObject data = new JsonObject();
 
     public KUser(long discord_id) {
@@ -32,14 +31,24 @@ public class KUser {
         });
     }
 
-    ;
+    public JsonObject getData() {
+        return data;
+    }
+
+    public <T> void set(KField<T> field, T value) {
+        field.set(this, field.sanitize(value));
+    }
+
+    public <T> T get(KField<T> field) {
+        return field.get(this);
+    }
 
 
     private void load() {
         Gson gson = new Gson();
         FileReader reader;
         try {
-            reader = new FileReader("data/" + getDiscordId() + ".json");
+            reader = new FileReader("data/users/" + getDiscordId() + ".json");
         } catch (FileNotFoundException e) {
             return;
         }
@@ -59,7 +68,7 @@ public class KUser {
     }
 
     public void save() throws IOException {
-        FileWriter writer = new FileWriter("data/" + getDiscordId() + ".json");
+        FileWriter writer = new FileWriter("data/users/" + getDiscordId() + ".json");
 
         writer.write(data.toString());
 
