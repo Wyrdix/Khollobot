@@ -4,5 +4,9 @@
   },
   "id": {
     "enabled": true
+  },
+  "mail": {
+    "enabled": true,
+    "channel_id": -1
   }
 }
