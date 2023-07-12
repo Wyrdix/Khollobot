@@ -1,16 +1,13 @@
 package com.wyrdix.khollobot;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonIOException;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
+import com.google.gson.*;
 import com.wyrdix.khollobot.plugin.Plugin;
 import com.wyrdix.khollobot.plugin.PluginInfo;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,11 +26,24 @@ public class GlobalConfig {
     public static GlobalConfig getGlobalConfig() {
         if (INSTANCE == null) {
 
-            InputStream inputStream = GlobalConfig.class.getClassLoader().getResourceAsStream("global.json");
+            InputStream inputStream = null;
+            File globalFile = new File("global.json");
+            try {
+
+                if(!globalFile.exists()){
+                    InputStream stream = LoginConfig.class.getClassLoader().getResourceAsStream("global.json");
+                    assert stream != null;
+                    Files.copy(stream, globalFile.toPath());
+                }
+
+                inputStream = new FileInputStream("global.json");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             assert inputStream != null;
             InputStreamReader streamReader = new InputStreamReader(inputStream);
 
-            System.out.println("Loading global config resource file, may be located at : " + new File("global.json").getAbsolutePath());
+            System.out.println("Loading global config resource file, may be located at : " + globalFile.getAbsolutePath());
 
             try {
                 INSTANCE = new GlobalConfig(new Gson().fromJson(streamReader, JsonObject.class));
@@ -60,5 +70,25 @@ public class GlobalConfig {
         String id = info.id();
         return (T) configMap.computeIfAbsent(id, k->
                 new Gson().fromJson(config.get(k), info.config()));
+    }
+
+    public void save() {
+
+        Gson gson = new Gson();
+
+        for (Map.Entry<String, Plugin.PluginConfig> entry : configMap.entrySet()) {
+            String key = entry.getKey();
+            Plugin.PluginConfig value = entry.getValue();
+            JsonElement serialized = gson.toJsonTree(value);
+
+            config.add(key, serialized);
+        }
+
+        String raw = gson.toJson(config);
+        try {
+            Files.write(Path.of("global.json"), Collections.singleton(raw));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
