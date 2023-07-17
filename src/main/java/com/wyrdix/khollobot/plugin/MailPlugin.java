@@ -1,5 +1,6 @@
 package com.wyrdix.khollobot.plugin;
 
+import com.google.gson.*;
 import com.wyrdix.khollobot.GlobalConfig;
 import com.wyrdix.khollobot.KholloBot;
 import com.wyrdix.khollobot.LoginConfig;
@@ -16,10 +17,9 @@ import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Properties;
+import java.lang.reflect.Type;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @PluginInfo(id = "mail", name = "Mail", version = "1.0-SNAPSHOT", author = "Wyrdix", config = MailPlugin.MailPluginConfig.class)
 public class MailPlugin implements Plugin {
@@ -43,6 +43,10 @@ public class MailPlugin implements Plugin {
         return downloadedAttachments;
     }
 
+    public static boolean isWhitelisted(String address){
+        return ((MailPluginConfig) GlobalConfig.getGlobalConfig().getConfig(MailPlugin.class)).address.contains(address);
+    }
+
     public static @NotNull
     MessageEmbed getMailMessage(javax.mail.Message message) throws MessagingException, IOException {
         String line = getTextFromMessage(message);
@@ -50,8 +54,10 @@ public class MailPlugin implements Plugin {
         String from = message.getFrom()[0].toString();
         String date = message.getSentDate().toString();
 
-        if (from.contains("no-reply")) //noinspection ConstantConditions
+        if (message.getFrom().length == 0 || !isWhitelisted(message.getFrom()[0].getType())) {
+            //noinspection ConstantConditions
             return null;
+        }
 
         line = line.replaceAll("Le.*?écrit:.*?--End of Post--", "");
 
@@ -122,7 +128,7 @@ public class MailPlugin implements Plugin {
                 MessageEmbed message = getMailMessage(mail);
 
 
-                File dataFolder = new File("data/"+System.currentTimeMillis()+"/");
+                File dataFolder = new File("data/" + System.currentTimeMillis() + "/");
                 //noinspection ResultOfMethodCallIgnored
                 dataFolder.mkdirs();
 
@@ -133,7 +139,7 @@ public class MailPlugin implements Plugin {
                 List<FileUpload> uploads = files.stream().map(FileUpload::fromData).toList();
 
 
-                mail_channel.sendMessageEmbeds(message).queue(a -> mail_channel.sendFiles(uploads).queue(s->{
+                mail_channel.sendMessageEmbeds(message).queue(a -> mail_channel.sendFiles(uploads).queue(s -> {
                     //noinspection ResultOfMethodCallIgnored
                     files.forEach(File::delete);
                     //noinspection ResultOfMethodCallIgnored
@@ -154,8 +160,27 @@ public class MailPlugin implements Plugin {
         }
     }
 
-    public static class MailPluginConfig extends Plugin.PluginConfig {
+    public static class MailPluginConfig extends Plugin.PluginConfig implements JsonDeserializer<MailPluginConfig> {
         public long channel_id;
+
+        public Set<String> address;
+
+        public MailPluginConfig(PluginConfig config) {
+            super(config);
+        }
+
+        @Override
+        public MailPluginConfig deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+
+            PluginConfig config = context.deserialize(json, PLUGIN_CONFIG_TYPE);
+            MailPluginConfig pluginConfig = new MailPluginConfig(config);
+
+            JsonArray admins = json.getAsJsonObject().getAsJsonArray("address");
+
+            pluginConfig.address = admins.asList().stream().map(JsonElement::getAsString).collect(Collectors.toSet());
+
+            return pluginConfig;
+        }
     }
 
     private class MailThread extends Thread {
