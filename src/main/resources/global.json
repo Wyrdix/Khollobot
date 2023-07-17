@@ -3,7 +3,10 @@
     "enabled": true
   },
   "id": {
-    "enabled": true
+    "enabled": true,
+    "admins": [
+      198128771516203008
+    ]
   },
   "mail": {
     "enabled": true,
