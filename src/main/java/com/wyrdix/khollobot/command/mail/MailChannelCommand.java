@@ -3,6 +3,7 @@ package com.wyrdix.khollobot.command.mail;
 import com.wyrdix.khollobot.GlobalConfig;
 import com.wyrdix.khollobot.command.KCommandImpl;
 import com.wyrdix.khollobot.plugin.DefaultPlugin;
+import com.wyrdix.khollobot.plugin.IdentityPlugin;
 import com.wyrdix.khollobot.plugin.MailPlugin;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
@@ -38,8 +39,8 @@ public class MailChannelCommand extends KCommandImpl {
             return;
         }
 
-        if (!PermissionUtil.checkPermission(member, Permission.ADMINISTRATOR)) {
-            event.reply("Seuls les administrateurs de serveur peuvent modifier cette propriété.").queue();
+        if (!PermissionUtil.checkPermission(member, Permission.ADMINISTRATOR) || !IdentityPlugin.isBotAdmin(member.getIdLong())) {
+            event.reply("Seuls les administrateurs de serveur et du bot peuvent modifier cette propriété.").queue();
             return;
         }
 

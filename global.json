@@ -1,0 +1,15 @@
+{
+  "default": {
+    "enabled": true
+  },
+  "id": {
+    "enabled": true,
+    "admins": [
+      198128771516203008
+    ]
+  },
+  "mail": {
+    "channel_id": 597814414690877451,
+    "enabled": true
+  }
+}
