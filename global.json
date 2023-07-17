@@ -11,5 +11,8 @@
   "mail": {
     "channel_id": 597814414690877451,
     "enabled": true
+  },
+  "cafeteria": {
+    "enabled": true
   }
 }

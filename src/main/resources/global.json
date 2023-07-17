@@ -14,5 +14,8 @@
     "address": [
 
     ]
+  },
+  "cafeteria": {
+    "enabled": true
   }
 }

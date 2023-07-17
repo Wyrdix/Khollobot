@@ -2,10 +2,7 @@ package com.wyrdix.khollobot;
 
 
 import com.wyrdix.khollobot.command.KCommand;
-import com.wyrdix.khollobot.plugin.DefaultPlugin;
-import com.wyrdix.khollobot.plugin.IdentityPlugin;
-import com.wyrdix.khollobot.plugin.MailPlugin;
-import com.wyrdix.khollobot.plugin.Plugin;
+import com.wyrdix.khollobot.plugin.*;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -29,6 +26,7 @@ public class KholloBot {
         addPlugin(new DefaultPlugin());
         addPlugin(new IdentityPlugin());
         addPlugin(new MailPlugin());
+        addPlugin(new CafeteriaPlugin());
 
         getJDA().addEventListener(new ListenerAdapter() {
             @Override
