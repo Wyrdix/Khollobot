@@ -5,6 +5,7 @@ import com.wyrdix.khollobot.plugin.Plugin;
 import com.wyrdix.khollobot.plugin.PluginInfo;
 
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
@@ -68,8 +69,23 @@ public class GlobalConfig {
         if (info == null) throw new RuntimeException("Plugin class should be annotated with @PluginInfo");
 
         String id = info.id();
-        return (T) configMap.computeIfAbsent(id, k->
-                new Gson().fromJson(config.get(k), info.config()));
+        return (T) configMap.computeIfAbsent(id, k-> {
+
+            Gson gson;
+
+            if (info.config().isAssignableFrom(JsonDeserializer.class)) {
+                try {
+                    Class<? extends JsonDeserializer<?>> config = (Class<? extends JsonDeserializer<?>>) info.config();
+                    gson = new GsonBuilder().
+                            registerTypeAdapter(config, config.getConstructor().newInstance()).create();
+                } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                    e.printStackTrace();
+                    gson = new Gson();
+                }
+            }else gson = new Gson();
+
+            return gson.fromJson(config.get(k), info.config());
+        });
     }
 
     public void save() {

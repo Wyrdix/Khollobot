@@ -11,17 +11,17 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.internal.utils.PermissionUtil;
 
-public class MailChannelCommand extends KCommandImpl {
+public class MailAddressCommand extends KCommandImpl {
 
-    private static final MailChannelCommand INSTANCE = new MailChannelCommand();
-    private static final String ID = "mail_channel";
-    private static final String DESCRIPTION = "Défini le canal dans lequel les mails doivent être envoyés";
+    private static final MailAddressCommand INSTANCE = new MailAddressCommand();
+    private static final String ID = "mail_address";
+    private static final String DESCRIPTION = "Configure les adresse email pour lesquels le bot transmettra les mails";
 
-    public MailChannelCommand() {
+    public MailAddressCommand() {
         super(DefaultPlugin.class, ID, DESCRIPTION);
     }
 
-    public static MailChannelCommand getInstance() {
+    public static MailAddressCommand getInstance() {
         return INSTANCE;
     }
 
