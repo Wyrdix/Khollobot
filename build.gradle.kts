@@ -17,7 +17,7 @@ dependencies {
     }
     implementation("com.google.code.gson:gson:2.10.1")
     implementation("com.sun.mail:javax.mail:1.6.2")
-
+    implementation("org.mnode.ical4j:ical4j:4.0.0-beta2")
 }
 
 tasks.compileJava {

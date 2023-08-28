@@ -25,6 +25,6 @@ public class CalendarCommand extends KCommandImpl {
 
     @Override
     public void execute(SlashCommandInteractionEvent event) {
-        CalendarPlugin.sendCalendar(event, 1); //TODO get the current week
+        CalendarPlugin.sendCalendar(event, CalendarPlugin.getCurrentWeek());
     }
 }
