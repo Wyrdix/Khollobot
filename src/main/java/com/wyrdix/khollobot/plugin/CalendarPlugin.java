@@ -9,9 +9,7 @@ import com.wyrdix.khollobot.plugin.calendar.CalendarInstance;
 import com.wyrdix.khollobot.plugin.calendar.impl.CalendarInstanceImpl;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
-import net.dv8tion.jda.api.hooks.EventListener;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.hooks.SubscribeEvent;
 import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback;
 import net.dv8tion.jda.api.interactions.components.ItemComponent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
@@ -35,8 +33,8 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 
 @PluginInfo(id = "calendar", name = "Calendrier", version = "1.0-SNAPSHOT", author = "Wyrdix")
 public class CalendarPlugin extends ListenerAdapter implements Plugin {
@@ -48,69 +46,29 @@ public class CalendarPlugin extends ListenerAdapter implements Plugin {
     private static final List<Holiday> holidays = new ArrayList<>();
     private static final java.util.Calendar doomsday = java.util.Calendar.getInstance(timeZone);
 
-    @Override
-    public void onEnable() {
-        addCommand(CalendarCommand.getInstance());
-
-        File calendarFolder = CalendarInstance.CALENDAR_FOLDER;
-        if(!calendarFolder.exists()) //noinspection ResultOfMethodCallIgnored
-            calendarFolder.mkdirs();
-
-        for (File file : Objects.requireNonNull(calendarFolder.listFiles())) {
-            String name = file.getName();
-            if(name.endsWith(".cal")) name = name.substring(0, name.lastIndexOf(".cal"));
-
-            System.out.println("Loading calendar : "+name);
-            instanceMap.put(name, new CalendarInstanceImpl(name));
-        }
-
-        instanceMap.values().forEach(CalendarInstance::load);
-
-        InputStream fin = null;
-        try {
-            fin = new URL("https://fr.ftp.opendatasoft.com/openscol/fr-en-calendrier-scolaire/Zone-B.ics").openStream();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        CalendarBuilder builder = new CalendarBuilder();
-        try {
-            Calendar holidayCalendar = builder.build(fin);
-
-            java.util.Calendar calendar = doomsday;
-            calendar.set(2023, java.util.Calendar.SEPTEMBER, 5);
+    private static void drawSchoolDayComponent(Graphics2D g2d, CalendarElement element) {
+        int x = ImageGenerator.WIDTH_OFFSET + element.day() * ImageGenerator.COLUMN_WIDTH;
+        double y = ImageGenerator.HEIGHT_OFFSET + ((element.beginning() - 8) * ImageGenerator.SEGMENT_HEIGHT);
+        float height = ((element.ending() - element.beginning()) * ImageGenerator.SEGMENT_HEIGHT);
 
 
-            holidayCalendar.getComponents(Component.VEVENT).forEach(event -> {
-                DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+        g2d.setColor(Color.BLACK);
+        g2d.fillRect(x, (int) y, ImageGenerator.COLUMN_WIDTH, (int) height);
 
-                String name = event.getProperty("SUMMARY").get().getValue();
-                if (!name.startsWith("Vacances")) return;
 
-                Date begin = null;
-                Date end = null;
-                try {
-                    begin = dateFormat.parse(event.getProperty("DTSTART").get().getValue());
-                    end = dateFormat.parse(event.getProperty("DTEND").get().getValue());
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
+        CalendarElementTemplate template = element.template();
+        g2d.setColor(template.background().brighter());
+        g2d.fillRect(x + 1, (int) y + 1, ImageGenerator.COLUMN_WIDTH - 2, (int) height - 2);
+        g2d.setColor(template.fontColor());
 
-                assert begin != null && end != null;
+        String extra = "";
+        if (!template.room().isEmpty()) extra += template.room();
+        if (!template.room().isEmpty() && !template.teacher().isEmpty()) extra += " ";
+        if (!template.room().isEmpty()) extra += template.teacher();
 
-                ZonedDateTime begin_zdt = begin.toInstant().atZone(zoneId).plusSeconds(1).truncatedTo(ChronoUnit.DAYS);
-                ZonedDateTime end_zdt = end.toInstant().atZone(zoneId).minusSeconds(1).truncatedTo(ChronoUnit.DAYS);
-
-                if(end_zdt.toInstant().getEpochSecond() - begin_zdt.toInstant().getEpochSecond() < 86400) return;
-
-                if (begin_zdt.isBefore(calendar.toInstant().atZone(zoneId))) return;
-                holidays.add(new Holiday(begin_zdt, end_zdt, name));
-            });
-
-        } catch (IOException | ParserException e) {
-            e.printStackTrace();
-        }
-
-        KholloBot.getJDA().addEventListener(this);
+        drawCenteredString(g2d, x, (int) y, ImageGenerator.COLUMN_WIDTH, (int) height,
+                template.name() + (extra.isEmpty() ? "" : "\n" + extra)
+        );
     }
 
     private record Holiday(ZonedDateTime begin, ZonedDateTime end, String name){}
@@ -208,7 +166,73 @@ public class CalendarPlugin extends ListenerAdapter implements Plugin {
         }
     }
 
-    final class ImageGenerator {
+    @SuppressWarnings({"OptionalGetWithoutIsPresent", "CallToPrintStackTrace"})
+    @Override
+    public void onEnable() {
+        addCommand(CalendarCommand.getInstance());
+
+        File calendarFolder = CalendarInstance.CALENDAR_FOLDER;
+        if(!calendarFolder.exists()) //noinspection ResultOfMethodCallIgnored
+            calendarFolder.mkdirs();
+
+        for (File file : Objects.requireNonNull(calendarFolder.listFiles())) {
+            String name = file.getName();
+            if(name.endsWith(".cal")) name = name.substring(0, name.lastIndexOf(".cal"));
+
+            System.out.println("Loading calendar : "+name);
+            instanceMap.put(name, new CalendarInstanceImpl(name));
+        }
+
+        instanceMap.values().forEach(CalendarInstance::load);
+
+        InputStream fin;
+        try {
+            fin = new URL("https://fr.ftp.opendatasoft.com/openscol/fr-en-calendrier-scolaire/Zone-B.ics").openStream();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        CalendarBuilder builder = new CalendarBuilder();
+        try {
+            Calendar holidayCalendar = builder.build(fin);
+
+            java.util.Calendar calendar = doomsday;
+            calendar.set(2023, java.util.Calendar.SEPTEMBER, 5);
+
+
+            holidayCalendar.getComponents(Component.VEVENT).forEach(event -> {
+                DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+
+                String name = event.getProperty("SUMMARY").get().getValue();
+                if (!name.startsWith("Vacances")) return;
+
+                Date begin = null;
+                Date end = null;
+                try {
+                    begin = dateFormat.parse(event.getProperty("DTSTART").get().getValue());
+                    end = dateFormat.parse(event.getProperty("DTEND").get().getValue());
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+
+                assert begin != null && end != null;
+
+                ZonedDateTime begin_zdt = begin.toInstant().atZone(zoneId).plusSeconds(1).truncatedTo(ChronoUnit.DAYS);
+                ZonedDateTime end_zdt = end.toInstant().atZone(zoneId).minusSeconds(1).truncatedTo(ChronoUnit.DAYS);
+
+                if(end_zdt.toInstant().getEpochSecond() - begin_zdt.toInstant().getEpochSecond() < 86400) return;
+
+                if (begin_zdt.isBefore(calendar.toInstant().atZone(zoneId))) return;
+                holidays.add(new Holiday(begin_zdt, end_zdt, name));
+            });
+
+        } catch (IOException | ParserException e) {
+            e.printStackTrace();
+        }
+
+        KholloBot.getJDA().addEventListener(this);
+    }
+
+    static final class ImageGenerator {
 
         private final static int WIDTH_OFFSET = 50;
         private final static int END_COLUMN_OFFSET = 50;
@@ -219,7 +243,6 @@ public class CalendarPlugin extends ListenerAdapter implements Plugin {
 
         private final static int DAYS_PER_WEEK = 5;
         private final static int SEGMENTS_PER_DAY = 11;
-        private static final Color KHOLLE_BACK_COLOR = Color.decode("#e58e26");
 
         @SuppressWarnings("all")
         public static BufferedImage getCalendar(int week) {
@@ -241,7 +264,7 @@ public class CalendarPlugin extends ListenerAdapter implements Plugin {
             g2d.setColor(Color.BLACK);
             for (CalendarInstance value : plugin.instanceMap.values()) {
                 for (CalendarElement element : value.elements()) {
-                    drawSchoolDayComponent(image, g2d, element);
+                    drawSchoolDayComponent(g2d, element);
                 }
             }
 
@@ -268,31 +291,6 @@ public class CalendarPlugin extends ListenerAdapter implements Plugin {
 
             return image;
         }
-    }
-
-    private static void drawSchoolDayComponent(BufferedImage image, Graphics2D g2d, CalendarElement element) {
-        int x = ImageGenerator.WIDTH_OFFSET + element.day() * ImageGenerator.COLUMN_WIDTH;
-        double y = ImageGenerator.HEIGHT_OFFSET + ((element.beginning() - 8) * ImageGenerator.SEGMENT_HEIGHT);
-        float height = ((element.ending() - element.beginning()) * ImageGenerator.SEGMENT_HEIGHT);
-
-
-        g2d.setColor(Color.BLACK);
-        g2d.fillRect(x, (int) y, ImageGenerator.COLUMN_WIDTH, (int) height);
-
-
-        CalendarElementTemplate template = element.template();
-        g2d.setColor(template.background().brighter());
-        g2d.fillRect(x + 1, (int) y + 1, ImageGenerator.COLUMN_WIDTH - 2, (int) height - 2);
-        g2d.setColor(template.fontColor());
-
-        String extra = "";
-        if (!template.room().isEmpty()) extra += template.room();
-        if (!template.room().isEmpty() && !template.teacher().isEmpty()) extra += " ";
-        if (!template.room().isEmpty()) extra += template.teacher();
-
-        drawCenteredString(g2d, x, (int) y, ImageGenerator.COLUMN_WIDTH, (int) height,
-                template.name() + (extra.isEmpty() ? "" : "\n" + extra)
-        );
     }
 
     private static void drawCenteredString(Graphics g, int x, int y, int width, int height, String text) {

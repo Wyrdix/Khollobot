@@ -1,7 +1,5 @@
 package com.wyrdix.khollobot.plugin.calendar.impl;
 
-import com.wyrdix.khollobot.KholloBot;
-import com.wyrdix.khollobot.plugin.CalendarPlugin;
 import com.wyrdix.khollobot.plugin.calendar.CalendarElement;
 import com.wyrdix.khollobot.plugin.calendar.CalendarElementTemplate;
 import com.wyrdix.khollobot.plugin.calendar.CalendarInstance;

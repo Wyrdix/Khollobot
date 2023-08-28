@@ -34,7 +34,6 @@ public class MailPlugin implements Plugin {
             if (Part.ATTACHMENT.equalsIgnoreCase(part.getDisposition())) {
                 String file = MimeUtility.decodeText(part.getFileName());
                 if (part.getSize() >= 10000000) continue;
-                File[] files = name.listFiles();
                 String[] split = (file + "\\").split("\\\\");
                 String fileName = split[split.length - 1];
                 part.saveFile(new File(name, fileName));
@@ -66,7 +65,7 @@ public class MailPlugin implements Plugin {
 
         return new EmbedBuilder()
                 .addBlankField(false)
-                .setAuthor(from + "\nTitre : " + title + "")
+                .setAuthor(from + "\nTitre : " + title)
                 .setDescription(line)
                 .setFooter(date, null)
                 .build();
@@ -118,6 +117,7 @@ public class MailPlugin implements Plugin {
 
     }
 
+    @SuppressWarnings("CallToPrintStackTrace")
     private void onMailReceived(Message mail) {
         MailThread.canContinue = false;
 

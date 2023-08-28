@@ -3,7 +3,6 @@ package com.wyrdix.khollobot.plugin.calendar;
 import com.wyrdix.khollobot.plugin.calendar.impl.CalendarElementTemplateImpl;
 
 import java.awt.*;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -54,7 +53,7 @@ public interface CalendarElementTemplate {
         final String teacher = Objects.requireNonNull(args.get("teacher")).toString();
         final String room = Objects.requireNonNull(args.get("room")).toString();
         final Color background = new Color(Integer.decode(Objects.requireNonNull(args.get("background")).toString()), false);
-        final Color fontColor = new Color(Integer.decode(Objects.requireNonNullElse(args.get("fontColor"), "#000000").toString()), false);;
+        final Color fontColor = new Color(Integer.decode(Objects.requireNonNullElse(args.get("fontColor"), "#000000").toString()), false);
 
         return new CalendarElementTemplateImpl(instance, id, name, teacher, room, background, fontColor);
     }

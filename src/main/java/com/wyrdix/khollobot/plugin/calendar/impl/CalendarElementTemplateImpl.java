@@ -7,7 +7,7 @@ import java.awt.*;
 
 public class CalendarElementTemplateImpl implements CalendarElementTemplate {
     private final CalendarInstance instance;
-    private String id;
+    private final String id;
     private final String name;
     private final String teacher;
     private final String room;

@@ -1,12 +1,8 @@
 package com.wyrdix.khollobot.command.calendar;
 
-import com.wyrdix.khollobot.KholloBot;
 import com.wyrdix.khollobot.command.KCommandImpl;
 import com.wyrdix.khollobot.plugin.CalendarPlugin;
 import com.wyrdix.khollobot.plugin.DefaultPlugin;
-import com.wyrdix.khollobot.plugin.Plugin;
-import com.wyrdix.khollobot.plugin.PluginInfo;
-import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
 public class CalendarCommand extends KCommandImpl {
