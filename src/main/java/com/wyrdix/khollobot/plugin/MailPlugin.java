@@ -4,6 +4,7 @@ import com.google.gson.*;
 import com.wyrdix.khollobot.GlobalConfig;
 import com.wyrdix.khollobot.KholloBot;
 import com.wyrdix.khollobot.LoginConfig;
+import com.wyrdix.khollobot.command.mail.MailAddressCommand;
 import com.wyrdix.khollobot.command.mail.MailChannelCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -106,6 +107,7 @@ public class MailPlugin implements Plugin {
     @Override
     public void onEnable() {
         addCommand(MailChannelCommand.getInstance());
+        addCommand(MailAddressCommand.getInstance());
 
         MailThread thread = new MailThread();
         thread.start();
