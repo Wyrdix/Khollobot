@@ -27,6 +27,7 @@ public class KholloBot {
         addPlugin(new IdentityPlugin());
         addPlugin(new MailPlugin());
         addPlugin(new CafeteriaPlugin());
+        addPlugin(new CalendarPlugin());
 
         getJDA().addEventListener(new ListenerAdapter() {
             @Override

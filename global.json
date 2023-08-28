@@ -14,5 +14,8 @@
   },
   "cafeteria": {
     "enabled": true
+  },
+  "calendar": {
+    "enabled": true
   }
 }
