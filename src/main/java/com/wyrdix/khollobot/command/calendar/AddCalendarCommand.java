@@ -4,9 +4,11 @@ import com.wyrdix.khollobot.KholloBot;
 import com.wyrdix.khollobot.command.KCommandImpl;
 import com.wyrdix.khollobot.plugin.CalendarPlugin;
 import com.wyrdix.khollobot.plugin.DefaultPlugin;
+import com.wyrdix.khollobot.plugin.IdentityPlugin;
 import com.wyrdix.khollobot.plugin.calendar.CalendarInstance;
 import com.wyrdix.khollobot.plugin.calendar.impl.CalendarInstanceImpl;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -39,6 +41,12 @@ public class AddCalendarCommand extends KCommandImpl {
 
     @Override
     public void execute(SlashCommandInteractionEvent event) {
+        User user = event.getUser();
+
+        if (!IdentityPlugin.isBotAdmin(user.getIdLong())) {
+            event.reply("Seuls les administrateurs du bot peuvent modifier cette propriété.").queue();
+            return;
+        }
         Message.Attachment attachment = event.getOption("calendar", OptionMapping::getAsAttachment);
         assert attachment != null;
         String name = attachment.getFileName();

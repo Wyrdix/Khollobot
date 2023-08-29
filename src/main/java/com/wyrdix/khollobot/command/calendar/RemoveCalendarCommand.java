@@ -4,7 +4,9 @@ import com.wyrdix.khollobot.KholloBot;
 import com.wyrdix.khollobot.command.KCommandImpl;
 import com.wyrdix.khollobot.plugin.CalendarPlugin;
 import com.wyrdix.khollobot.plugin.DefaultPlugin;
+import com.wyrdix.khollobot.plugin.IdentityPlugin;
 import com.wyrdix.khollobot.plugin.calendar.CalendarInstance;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -36,6 +38,12 @@ public class RemoveCalendarCommand extends KCommandImpl {
 
     @Override
     public void execute(SlashCommandInteractionEvent event) {
+        User user = event.getUser();
+
+        if (!IdentityPlugin.isBotAdmin(user.getIdLong())) {
+            event.reply("Seuls les administrateurs du bot peuvent modifier cette propriété.").queue();
+            return;
+        }
         String calendar = event.getOption("calendar", OptionMapping::getAsString);
         assert calendar != null;
         Map<String, CalendarInstance> instances = KholloBot.getPlugin(CalendarPlugin.class).getInstances();
