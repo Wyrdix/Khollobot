@@ -43,7 +43,7 @@ public class KholloBot {
         getJDA().updateCommands().addCommands(KCommand.COMMAND_MAP.values().stream().map(KCommand::getData).toList()).queue(a->a.forEach(s->{
             String name = s.getFullCommandName();
             long id = s.getIdLong();
-
+            System.out.println("Registering commands : " + name);
             KCommand.COMMAND_MAP_BY_ID.put(id, KCommand.COMMAND_MAP.getOrDefault(name, null));
         }));
     }

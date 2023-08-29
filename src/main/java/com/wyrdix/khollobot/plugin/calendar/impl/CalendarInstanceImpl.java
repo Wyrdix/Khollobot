@@ -55,7 +55,7 @@ public class CalendarInstanceImpl implements CalendarInstance {
     }
 
     @Override
-    public CalendarElementTemplate getTemplate(String name) {
-        return templateMap.get(name);
+    public Map<String, CalendarElementTemplate> getTemplates() {
+        return templateMap;
     }
 }

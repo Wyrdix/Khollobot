@@ -2,7 +2,10 @@ package com.wyrdix.khollobot.plugin;
 
 
 import com.wyrdix.khollobot.KholloBot;
+import com.wyrdix.khollobot.command.calendar.AddCalendarCommand;
 import com.wyrdix.khollobot.command.calendar.CalendarCommand;
+import com.wyrdix.khollobot.command.calendar.ListCalendarCommand;
+import com.wyrdix.khollobot.command.calendar.RemoveCalendarCommand;
 import com.wyrdix.khollobot.plugin.calendar.CalendarElement;
 import com.wyrdix.khollobot.plugin.calendar.CalendarElementTemplate;
 import com.wyrdix.khollobot.plugin.calendar.CalendarInstance;
@@ -69,6 +72,10 @@ public class CalendarPlugin extends ListenerAdapter implements Plugin {
         drawCenteredString(g2d, x, (int) y, ImageGenerator.COLUMN_WIDTH, (int) height,
                 template.name() + (extra.isEmpty() ? "" : "\n" + extra)
         );
+    }
+
+    public Map<String, CalendarInstance> getInstances() {
+        return instanceMap;
     }
 
     private record Holiday(ZonedDateTime begin, ZonedDateTime end, String name){}
@@ -170,6 +177,9 @@ public class CalendarPlugin extends ListenerAdapter implements Plugin {
     @Override
     public void onEnable() {
         addCommand(CalendarCommand.getInstance());
+        addCommand(AddCalendarCommand.getInstance());
+        addCommand(RemoveCalendarCommand.getInstance());
+        addCommand(ListCalendarCommand.getInstance());
 
         File calendarFolder = CalendarInstance.CALENDAR_FOLDER;
         if(!calendarFolder.exists()) //noinspection ResultOfMethodCallIgnored
