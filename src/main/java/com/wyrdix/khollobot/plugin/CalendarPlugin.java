@@ -1,12 +1,14 @@
 package com.wyrdix.khollobot.plugin;
 
 
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
+import com.wyrdix.khollobot.GlobalConfig;
 import com.wyrdix.khollobot.KUser;
 import com.wyrdix.khollobot.KholloBot;
-import com.wyrdix.khollobot.command.calendar.AddCalendarCommand;
-import com.wyrdix.khollobot.command.calendar.CalendarCommand;
-import com.wyrdix.khollobot.command.calendar.ListCalendarCommand;
-import com.wyrdix.khollobot.command.calendar.RemoveCalendarCommand;
+import com.wyrdix.khollobot.command.calendar.*;
 import com.wyrdix.khollobot.plugin.calendar.CalendarElement;
 import com.wyrdix.khollobot.plugin.calendar.CalendarElementTemplate;
 import com.wyrdix.khollobot.plugin.calendar.CalendarInstance;
@@ -29,6 +31,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Type;
 import java.net.URL;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -40,7 +43,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.*;
 
-@PluginInfo(id = "calendar", name = "Calendrier", version = "1.0-SNAPSHOT", author = "Wyrdix")
+@PluginInfo(id = "calendar", name = "Calendrier", version = "1.0-SNAPSHOT", author = "Wyrdix", config = CalendarPlugin.CalendarPluginConfig.class)
 public class CalendarPlugin extends ListenerAdapter implements Plugin {
 
     private final Map<String, CalendarInstance> instanceMap = new HashMap<>();
@@ -94,7 +97,7 @@ public class CalendarPlugin extends ListenerAdapter implements Plugin {
             }else between-=2;
         }
 
-        return (int) between;
+        return (int) between + ((CalendarPluginConfig) GlobalConfig.getGlobalConfig().getConfig(CalendarPlugin.class)).offset;
     }
 
     @Override
@@ -176,73 +179,21 @@ public class CalendarPlugin extends ListenerAdapter implements Plugin {
         }
     }
 
-    @SuppressWarnings({"OptionalGetWithoutIsPresent", "CallToPrintStackTrace"})
-    @Override
-    public void onEnable() {
-        addCommand(CalendarCommand.getInstance());
-        addCommand(AddCalendarCommand.getInstance());
-        addCommand(RemoveCalendarCommand.getInstance());
-        addCommand(ListCalendarCommand.getInstance());
+    private static void drawCenteredString(Graphics g, int x, int y, int width, int height, String text) {
+        // Get the FontMetrics
+        FontMetrics metrics = g.getFontMetrics(g.getFont());
+        // Determine the X coordinate for the text
+        String[] split = text.split("\n");
+        for (int i = 0; i < split.length; i++) {
 
-        File calendarFolder = CalendarInstance.CALENDAR_FOLDER;
-        if(!calendarFolder.exists()) //noinspection ResultOfMethodCallIgnored
-            calendarFolder.mkdirs();
+            String line = split[i];
 
-        for (File file : Objects.requireNonNull(calendarFolder.listFiles())) {
-            String name = file.getName();
-            if(name.endsWith(".cal")) name = name.substring(0, name.lastIndexOf(".cal"));
+            int newx = x + (width - metrics.stringWidth(line)) / 2;
+            int newy = y + (i * (metrics.getHeight())) + ((height - (split.length) * metrics.getHeight()) / 2) + metrics.getAscent();
 
-            System.out.println("Loading calendar : "+name);
-            instanceMap.put(name, new CalendarInstanceImpl(name));
+            g.drawString(line, newx, newy);
+
         }
-
-        instanceMap.values().forEach(CalendarInstance::load);
-
-        InputStream fin;
-        try {
-            fin = new URL("https://fr.ftp.opendatasoft.com/openscol/fr-en-calendrier-scolaire/Zone-B.ics").openStream();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        CalendarBuilder builder = new CalendarBuilder();
-        try {
-            Calendar holidayCalendar = builder.build(fin);
-
-            java.util.Calendar calendar = doomsday;
-            calendar.set(2023, java.util.Calendar.SEPTEMBER, 5);
-
-
-            holidayCalendar.getComponents(Component.VEVENT).forEach(event -> {
-                DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
-
-                String name = event.getProperty("SUMMARY").get().getValue();
-                if (!name.startsWith("Vacances")) return;
-
-                Date begin = null;
-                Date end = null;
-                try {
-                    begin = dateFormat.parse(event.getProperty("DTSTART").get().getValue());
-                    end = dateFormat.parse(event.getProperty("DTEND").get().getValue());
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-
-                assert begin != null && end != null;
-
-                ZonedDateTime begin_zdt = begin.toInstant().atZone(zoneId).plusSeconds(1).truncatedTo(ChronoUnit.DAYS);
-                ZonedDateTime end_zdt = end.toInstant().atZone(zoneId).minusSeconds(1).truncatedTo(ChronoUnit.DAYS);
-
-                if(end_zdt.toInstant().getEpochSecond() - begin_zdt.toInstant().getEpochSecond() < 86400) return;
-
-                if (begin_zdt.isBefore(calendar.toInstant().atZone(zoneId))) return;
-                holidays.add(new Holiday(begin_zdt, end_zdt, name));
-            });
-
-        } catch (IOException | ParserException e) {
-            e.printStackTrace();
-        }
-
-        KholloBot.getJDA().addEventListener(this);
     }
 
     static final class ImageGenerator {
@@ -306,21 +257,94 @@ public class CalendarPlugin extends ListenerAdapter implements Plugin {
         }
     }
 
-    private static void drawCenteredString(Graphics g, int x, int y, int width, int height, String text) {
-        // Get the FontMetrics
-        FontMetrics metrics = g.getFontMetrics(g.getFont());
-        // Determine the X coordinate for the text
-        String[] split = text.split("\n");
-        for (int i = 0; i < split.length; i++) {
+    @SuppressWarnings({"OptionalGetWithoutIsPresent", "CallToPrintStackTrace"})
+    @Override
+    public void onEnable() {
+        addCommand(CalendarCommand.getInstance());
+        addCommand(AddCalendarCommand.getInstance());
+        addCommand(RemoveCalendarCommand.getInstance());
+        addCommand(ListCalendarCommand.getInstance());
+        addCommand(WeekSetCommand.getInstance());
 
-            String line = split[i];
+        File calendarFolder = CalendarInstance.CALENDAR_FOLDER;
+        if(!calendarFolder.exists()) //noinspection ResultOfMethodCallIgnored
+            calendarFolder.mkdirs();
 
-            int newx = x + (width - metrics.stringWidth(line)) / 2;
-            int newy = y + (i * (metrics.getHeight())) + ((height - (split.length) * metrics.getHeight()) / 2) + metrics.getAscent();
+        for (File file : Objects.requireNonNull(calendarFolder.listFiles())) {
+            String name = file.getName();
+            if(name.endsWith(".cal")) name = name.substring(0, name.lastIndexOf(".cal"));
 
-            g.drawString(line, newx, newy);
-
+            System.out.println("Loading calendar : "+name);
+            instanceMap.put(name, new CalendarInstanceImpl(name));
         }
 
+        instanceMap.values().forEach(CalendarInstance::load);
+
+        InputStream fin;
+        try {
+            fin = new URL("https://fr.ftp.opendatasoft.com/openscol/fr-en-calendrier-scolaire/Zone-B.ics").openStream();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        CalendarBuilder builder = new CalendarBuilder();
+        try {
+            Calendar holidayCalendar = builder.build(fin);
+
+            java.util.Calendar calendar = doomsday;
+            calendar.set(2023, java.util.Calendar.SEPTEMBER, 5);
+
+
+            holidayCalendar.getComponents(Component.VEVENT).forEach(event -> {
+                DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+
+                String name = event.getProperty("SUMMARY").get().getValue();
+                if (!name.startsWith("Vacances")) return;
+
+                Date begin = null;
+                Date end = null;
+                try {
+                    begin = dateFormat.parse(event.getProperty("DTSTART").get().getValue());
+                    end = dateFormat.parse(event.getProperty("DTEND").get().getValue());
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+
+                assert begin != null && end != null;
+
+                ZonedDateTime begin_zdt = begin.toInstant().atZone(zoneId).plusSeconds(1).truncatedTo(ChronoUnit.DAYS);
+                ZonedDateTime end_zdt = end.toInstant().atZone(zoneId).minusSeconds(1).truncatedTo(ChronoUnit.DAYS);
+
+                if(end_zdt.toInstant().getEpochSecond() - begin_zdt.toInstant().getEpochSecond() < 86400) return;
+
+                if (begin_zdt.isBefore(calendar.toInstant().atZone(zoneId))) return;
+                holidays.add(new Holiday(begin_zdt, end_zdt, name));
+            });
+
+        } catch (IOException | ParserException e) {
+            e.printStackTrace();
+        }
+
+        KholloBot.getJDA().addEventListener(this);
+    }
+
+    public static final class CalendarPluginConfig extends PluginConfig implements JsonDeserializer<CalendarPluginConfig> {
+
+        public int offset = 0;
+
+        public CalendarPluginConfig(PluginConfig config) {
+            super(config);
+        }
+
+        @Override
+        public CalendarPluginConfig deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+
+            PluginConfig config = context.deserialize(json, PLUGIN_CONFIG_TYPE);
+
+            CalendarPluginConfig pluginConfig = new CalendarPluginConfig(config);
+            JsonElement element = json.getAsJsonObject().get("offset");
+            if (element != null && element.isJsonPrimitive()) pluginConfig.offset = element.getAsInt();
+
+            return pluginConfig;
+        }
     }
 }
