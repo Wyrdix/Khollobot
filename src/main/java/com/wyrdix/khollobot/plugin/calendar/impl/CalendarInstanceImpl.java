@@ -43,6 +43,8 @@ public class CalendarInstanceImpl implements CalendarInstance {
                 }else if(line.startsWith("ADD")){
                     CalendarElement element = CalendarElement.deserialize(this, line);
                     elements.add(element);
+                } else if (line.startsWith("//")) {
+                    continue;
                 }else if(!line.isBlank()) System.err.println("Unrecognized : "+line);
             }
         } catch (IOException e) {

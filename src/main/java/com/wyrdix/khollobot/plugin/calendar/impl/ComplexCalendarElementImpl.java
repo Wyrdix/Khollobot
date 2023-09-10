@@ -29,10 +29,16 @@ public class ComplexCalendarElementImpl implements ComplexCalendarElement {
         this.template = template;
         if (filter.contains(";")) this.filter = Collections.singletonList(filter);
         else this.filter = Arrays.stream(filter.split(";")).toList();
-        String[] split = cycle.split("\\|");
-        this.cycleWith = split[0];
-        this.cycle = Arrays.stream(split[1].split(";")).mapToInt(Integer::parseInt).toArray();
-        this.infiniteCycle = infinite_cycle;
+        if (cycle != null && !cycle.isEmpty()) {
+            String[] split = cycle.split("\\|");
+            this.cycleWith = split[0];
+            this.cycle = Arrays.stream(split[1].split(";")).mapToInt(Integer::parseInt).toArray();
+            this.infiniteCycle = infinite_cycle;
+        } else {
+            this.cycleWith = null;
+            this.cycle = new int[0];
+            this.infiniteCycle = false;
+        }
     }
 
     @Override
@@ -72,6 +78,7 @@ public class ComplexCalendarElementImpl implements ComplexCalendarElement {
 
     @Override
     public int getCycleOnWeek(int week) {
+        if (cycle.length == 0) return (-1);
         week--;
         if (week < 0 || (week > cycle.length && !infiniteCycle)) return (-1);
         return cycle[week % cycle.length];
@@ -87,14 +94,30 @@ public class ComplexCalendarElementImpl implements ComplexCalendarElement {
         Map<String, GroupPlugin.GroupConfig> map = new HashMap<>(user.get(GroupPlugin.USER_GROUPS));
         map.values().removeIf(s -> s.subgroup == 0);
 
-        if (!map.containsKey(cycleWith)) return false;
+        if (cycle.length != 0) {
 
-        int cycleOnWeek = getCycleOnWeek(week);
-        if (cycleOnWeek != map.get(cycleWith).subgroup) return false;
+            if (!map.containsKey(cycleWith)) return false;
+
+            int cycleOnWeek = getCycleOnWeek(week);
+            if (cycleOnWeek != map.get(cycleWith).subgroup) return false;
+
+        }
 
         for (String s : filter) {
+            if (s == null) continue;
+            if (s.isEmpty()) continue;
             if (s.startsWith("^") == map.containsKey(s)) return false;
         }
         return true;
+    }
+
+    @Override
+    public List<String> filter() {
+        return filter;
+    }
+
+    @Override
+    public int[] cycle() {
+        return cycle;
     }
 }

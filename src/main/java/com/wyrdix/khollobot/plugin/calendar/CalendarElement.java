@@ -21,12 +21,18 @@ public interface CalendarElement {
     CalendarInstance instance();
 
     static CalendarElement deserialize(CalendarInstance instance, String line){
+        final String copy = line;
         assert line.startsWith("ADD");
         line = line.substring("ADD".length());
 
         assert line.matches("^\\(.*\\)$");
         line = line.substring(1, line.length()-1);
-        final Map<String, Object> args = ArgumentParserUtil.getMapFromString(line);
+        final Map<String, Object> args;
+        try {
+            args = ArgumentParserUtil.getMapFromString(line);
+        } catch (Exception e) {
+            throw new RuntimeException("Could not parse " + copy);
+        }
 
         final int priority = Integer.parseInt(Objects.requireNonNullElse(args.get("priority"), "0").toString());
         final int day = Integer.parseInt(Objects.requireNonNull(args.get("day")).toString());

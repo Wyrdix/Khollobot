@@ -6,10 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import com.wyrdix.khollobot.field.KField;
 
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -68,6 +65,7 @@ public class KUser {
     }
 
     public void save() throws IOException {
+        new File("data/users").mkdirs();
         FileWriter writer = new FileWriter("data/users/" + getDiscordId() + ".json");
 
         writer.write(data.toString());

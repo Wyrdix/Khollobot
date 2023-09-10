@@ -10,7 +10,6 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.utils.FileUpload;
-import org.jetbrains.annotations.NotNull;
 
 import javax.mail.*;
 import javax.mail.internet.MimeBodyPart;
@@ -47,15 +46,17 @@ public class MailPlugin implements Plugin {
         return ((MailPluginConfig) GlobalConfig.getGlobalConfig().getConfig(MailPlugin.class)).address.contains(address);
     }
 
-    public static @NotNull
+    public static
     MessageEmbed getMailMessage(javax.mail.Message message) throws MessagingException, IOException {
         String line = getTextFromMessage(message);
         String title = message.getSubject();
         String from = message.getFrom()[0].toString();
         String date = message.getSentDate().toString();
-
-        if (message.getFrom().length == 0 || !isWhitelisted(message.getFrom()[0].getType())) {
-            //noinspection ConstantConditions
+        String email = message.getFrom()[0].toString().split("<", 2)[1];
+        email = email.substring(0, email.length() - 1);
+        if (!isWhitelisted(email)) {
+            System.err.println("Tried to forward a message but email address is not whitelisted : " + email);
+            System.err.println("Whitelist is : " + ((MailPluginConfig) GlobalConfig.getGlobalConfig().getConfig(MailPlugin.class)).address);
             return null;
         }
 
@@ -128,6 +129,7 @@ public class MailPlugin implements Plugin {
 
             if (mail_channel != null) {
                 MessageEmbed message = getMailMessage(mail);
+                if (message == null) return;
 
 
                 File dataFolder = new File("data/" + System.currentTimeMillis() + "/");
@@ -140,13 +142,15 @@ public class MailPlugin implements Plugin {
 
                 List<FileUpload> uploads = files.stream().map(FileUpload::fromData).toList();
 
-
-                mail_channel.sendMessageEmbeds(message).queue(a -> mail_channel.sendFiles(uploads).queue(s -> {
-                    //noinspection ResultOfMethodCallIgnored
-                    files.forEach(File::delete);
-                    //noinspection ResultOfMethodCallIgnored
-                    dataFolder.delete();
-                }));
+                mail_channel.sendMessageEmbeds(message).queue(a -> {
+                    if (uploads.isEmpty()) return;
+                    mail_channel.sendFiles(uploads).queue(s -> {
+                        //noinspection ResultOfMethodCallIgnored
+                        files.forEach(File::delete);
+                        //noinspection ResultOfMethodCallIgnored
+                        dataFolder.delete();
+                    });
+                });
 
             }
 
@@ -180,6 +184,7 @@ public class MailPlugin implements Plugin {
             JsonArray admins = json.getAsJsonObject().getAsJsonArray("address");
 
             pluginConfig.address = admins.asList().stream().map(JsonElement::getAsString).collect(Collectors.toSet());
+            pluginConfig.channel_id = json.getAsJsonObject().get("channel_id").getAsLong();
 
             return pluginConfig;
         }
@@ -249,7 +254,7 @@ public class MailPlugin implements Plugin {
 
                 try {
                     getMail().ifPresent(mail -> {
-                        System.out.println(mail);
+                        System.out.println(mail + String.valueOf(canContinue));
                         MailPlugin.this.onMailReceived(mail);
                     });
                 } catch (Exception e) {

@@ -33,7 +33,7 @@ public class GroupsCommand extends KCommandImpl {
         Map<String, GroupPlugin.GroupConfig> map = new HashMap<>(kUser.get(GroupPlugin.USER_GROUPS));
         GroupPlugin.GroupPluginConfig config = GlobalConfig.getGlobalConfig().getConfig(GroupPlugin.class);
         config.groups.forEach(s -> {
-            if (!map.containsKey(s.name)) map.put(s.name, s);
+            if (!map.containsKey(s.name)) map.put(s.name, new GroupPlugin.GroupConfig(s.name, 0));
         });
 
         EmbedBuilder builder = new EmbedBuilder();

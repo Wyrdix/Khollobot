@@ -6,6 +6,7 @@ import com.wyrdix.khollobot.plugin.*;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.requests.GatewayIntent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -21,7 +22,7 @@ public class KholloBot {
     }
 
     public static void main(String[] args) {
-        setJDA(JDABuilder.createDefault(LoginConfig.getLogin().getDiscordToken()).build());
+        setJDA(JDABuilder.createDefault(LoginConfig.getLogin().getDiscordToken()).enableIntents(GatewayIntent.MESSAGE_CONTENT).build());
 
         addPlugin(new DefaultPlugin());
         addPlugin(new IdentityPlugin());

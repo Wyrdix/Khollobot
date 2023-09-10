@@ -12,6 +12,7 @@ import com.wyrdix.khollobot.command.calendar.*;
 import com.wyrdix.khollobot.plugin.calendar.CalendarElement;
 import com.wyrdix.khollobot.plugin.calendar.CalendarElementTemplate;
 import com.wyrdix.khollobot.plugin.calendar.CalendarInstance;
+import com.wyrdix.khollobot.plugin.calendar.ComplexCalendarElement;
 import com.wyrdix.khollobot.plugin.calendar.impl.CalendarInstanceImpl;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
@@ -64,7 +65,7 @@ public class CalendarPlugin extends ListenerAdapter implements Plugin {
 
 
         CalendarElementTemplate template = element.template();
-        g2d.setColor(template.background().brighter());
+        g2d.setColor(template.background());
         g2d.fillRect(x + 1, (int) y + 1, ImageGenerator.COLUMN_WIDTH - 2, (int) height - 2);
         g2d.setColor(template.fontColor());
 
@@ -80,6 +81,40 @@ public class CalendarPlugin extends ListenerAdapter implements Plugin {
 
     public Map<String, CalendarInstance> getInstances() {
         return instanceMap;
+    }
+
+    public void generateGroups() {
+        if (!GlobalConfig.getGlobalConfig().getConfig(GroupPlugin.class).isEnabled()) return;
+        Map<String, Integer> groups = new HashMap<>();
+        GroupPlugin.GroupPluginConfig config = GlobalConfig.getGlobalConfig().getConfig(GroupPlugin.class);
+        for (GroupPlugin.GroupConfig group : config.groups) {
+            groups.put(group.name, group.subgroup);
+        }
+
+        for (CalendarInstance instance : getInstances().values()) {
+            for (CalendarElement ele : instance.elements()) {
+                if (!(ele instanceof ComplexCalendarElement complex)) continue;
+
+                for (String s : complex.filter()) {
+                    if (s.startsWith("^")) s = s.substring(1);
+
+                    if (groups.getOrDefault(s, 0) <= 0) groups.put(s, 1);
+                }
+
+                String s = complex.cycleWith();
+                if (s != null && !s.isEmpty()) {
+                    int max = Arrays.stream(complex.cycle()).max().orElse(0);
+                    if (groups.getOrDefault(s, 0) <= max) groups.put(s, max);
+                }
+            }
+        }
+
+        config.groups.clear();
+
+        groups.forEach(config::add);
+
+        GlobalConfig.getGlobalConfig().save();
+
     }
 
     private record Holiday(ZonedDateTime begin, ZonedDateTime end, String name){}
@@ -265,6 +300,7 @@ public class CalendarPlugin extends ListenerAdapter implements Plugin {
         addCommand(RemoveCalendarCommand.getInstance());
         addCommand(ListCalendarCommand.getInstance());
         addCommand(WeekSetCommand.getInstance());
+        addCommand(GenerateGroupsCommand.getInstance());
 
         File calendarFolder = CalendarInstance.CALENDAR_FOLDER;
         if(!calendarFolder.exists()) //noinspection ResultOfMethodCallIgnored

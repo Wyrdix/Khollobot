@@ -47,5 +47,6 @@ public class MailAddressCommand extends KCommandImpl {
         config.address.add(address);
 
         event.reply("Cette adresse a bien été ajouté à la liste des adresses email de redirection").queue();
+        GlobalConfig.getGlobalConfig().save();
     }
 }
