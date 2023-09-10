@@ -6,10 +6,10 @@ import com.wyrdix.khollobot.KUser;
 import com.wyrdix.khollobot.plugin.GroupPlugin;
 
 import java.util.Collections;
-import java.util.Set;
+import java.util.Map;
 import java.util.stream.Collectors;
 
-public class KJsonGroupsField extends KField<Set<GroupPlugin.GroupConfig>> {
+public class KJsonGroupsField extends KField<Map<String, GroupPlugin.GroupConfig>> {
 
     private final KJsonElementField jsonElementField;
 
@@ -19,18 +19,18 @@ public class KJsonGroupsField extends KField<Set<GroupPlugin.GroupConfig>> {
     }
 
     @Override
-    public Set<GroupPlugin.GroupConfig> get(KUser user) {
+    public Map<String, GroupPlugin.GroupConfig> get(KUser user) {
         JsonElement element = jsonElementField.get(user);
-        if (element == null || !element.isJsonArray() || element.isJsonNull()) return Collections.emptySet();
+        if (element == null || !element.isJsonArray() || element.isJsonNull()) return Collections.emptyMap();
 
-        return element.getAsJsonArray().asList().stream().map(GroupPlugin.GroupConfig::deserialize).collect(Collectors.toSet());
+        return element.getAsJsonArray().asList().stream().map(GroupPlugin.GroupConfig::deserialize).collect(Collectors.toMap(s -> s.name, s -> s));
     }
 
     @Override
-    public void set(KUser user, Set<GroupPlugin.GroupConfig> value) {
+    public void set(KUser user, Map<String, GroupPlugin.GroupConfig> value) {
         JsonArray array = new JsonArray();
 
-        value.forEach(s -> array.add(GroupPlugin.GroupConfig.serialize(s)));
+        value.values().forEach(s -> array.add(GroupPlugin.GroupConfig.serialize(s)));
 
         jsonElementField.set(user, array);
     }

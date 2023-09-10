@@ -9,13 +9,14 @@ import com.wyrdix.khollobot.field.KJsonGroupsField;
 
 import java.lang.reflect.Type;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
 @PluginInfo(id = "group", name = "Groupe", version = "1.0-SNAPSHOT", author = "Wyrdix", config = GroupPlugin.GroupPluginConfig.class)
 public class GroupPlugin implements Plugin {
 
-    public static final KField<Set<GroupConfig>> USER_GROUPS = new KJsonGroupsField("groups");
+    public static final KField<Map<String, GroupConfig>> USER_GROUPS = new KJsonGroupsField("groups");
 
     @Override
     public void onEnable() {

@@ -10,9 +10,8 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
 import java.io.IOException;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Objects;
-import java.util.Set;
 
 public class GroupCommand extends KCommandImpl {
 
@@ -43,8 +42,8 @@ public class GroupCommand extends KCommandImpl {
         int subgroup = Objects.requireNonNull(event.getOption("subgroups")).getAsInt();
 
         KUser kUser = KUser.getKUser(user.getIdLong());
-        Set<GroupPlugin.GroupConfig> configs = new HashSet<>(kUser.get(GroupPlugin.USER_GROUPS));
-        configs.add(new GroupPlugin.GroupConfig(group, subgroup));
+        HashMap<String, GroupPlugin.GroupConfig> configs = new HashMap<>(kUser.get(GroupPlugin.USER_GROUPS));
+        configs.put(group, new GroupPlugin.GroupConfig(group, subgroup));
 
         kUser.set(GroupPlugin.USER_GROUPS, configs);
         try {

@@ -1,6 +1,7 @@
 package com.wyrdix.khollobot.plugin;
 
 
+import com.wyrdix.khollobot.KUser;
 import com.wyrdix.khollobot.KholloBot;
 import com.wyrdix.khollobot.command.calendar.AddCalendarCommand;
 import com.wyrdix.khollobot.command.calendar.CalendarCommand;
@@ -102,7 +103,8 @@ public class CalendarPlugin extends ListenerAdapter implements Plugin {
     }
 
     public static void sendCalendar(IReplyCallback event, int week) {
-        BufferedImage image = ImageGenerator.getCalendar(week);
+        KUser user = KUser.getKUser(event.getUser().getIdLong());
+        BufferedImage image = ImageGenerator.getCalendar(week, user);
 
         //noinspection ResultOfMethodCallIgnored
         new File("data").mkdirs();
@@ -130,6 +132,7 @@ public class CalendarPlugin extends ListenerAdapter implements Plugin {
 
     @Override
     public void onButtonInteraction(ButtonInteractionEvent event) {
+        KUser user = KUser.getKUser(event.getUser().getIdLong());
         Button button = event.getButton();
         if (button.getId() == null || !button.getId().startsWith("khollobot_week_")) return;
         Message.Interaction reference = event.getMessage().getInteraction();
@@ -145,7 +148,7 @@ public class CalendarPlugin extends ListenerAdapter implements Plugin {
 
         int week = Integer.parseInt(button.getId().substring("khollobot_week_".length()));
 
-        BufferedImage image = ImageGenerator.getCalendar(week);
+        BufferedImage image = ImageGenerator.getCalendar(week, user);
 
         //noinspection ResultOfMethodCallIgnored
         new File("data").mkdirs();
@@ -255,7 +258,7 @@ public class CalendarPlugin extends ListenerAdapter implements Plugin {
         private final static int SEGMENTS_PER_DAY = 11;
 
         @SuppressWarnings("all")
-        public static BufferedImage getCalendar(int week) {
+        public static BufferedImage getCalendar(int week, KUser user) {
             BufferedImage image = new BufferedImage(WIDTH_OFFSET + COLUMN_WIDTH * DAYS_PER_WEEK + END_COLUMN_OFFSET, HEIGHT_OFFSET + SEGMENT_HEIGHT * SEGMENTS_PER_DAY + END_HEIGHT_OFFSET, BufferedImage.TYPE_INT_RGB);
 
             Graphics2D g2d = (Graphics2D) image.getGraphics();
@@ -274,7 +277,7 @@ public class CalendarPlugin extends ListenerAdapter implements Plugin {
             g2d.setColor(Color.BLACK);
             for (CalendarInstance value : plugin.instanceMap.values()) {
                 for (CalendarElement element : value.elements()) {
-                    drawSchoolDayComponent(g2d, element);
+                    if (element.filter(week, user)) drawSchoolDayComponent(g2d, element);
                 }
             }
 
