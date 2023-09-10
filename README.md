@@ -11,11 +11,11 @@ Be aware that to compile and run this project successfully, a `login.json` file 
 The command will produce a runnable jar.
 
 ## Login
-For the moment, the structure of the login.json file is as follows: ```json
+For the moment, the structure of the login.json file is as follows: `
 {
   "discord_token": "[your bot token]",
   "mail_username": "[the email address you wish to forward to discord]",
   "mail_password": "[the password of the email address]".
 }
-```
+`
 You'll need to fill at least the discord bot token, and set the mail plugin to disabled if you want to run the bot
