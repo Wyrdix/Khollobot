@@ -20,5 +20,8 @@
   },
   "calendar": {
     "enabled": true
+  },
+  "group": {
+    "enabled": true
   }
 }

@@ -73,11 +73,11 @@ public class GlobalConfig {
 
             Gson gson;
 
-            if (info.config().isAssignableFrom(JsonDeserializer.class)) {
+            if (JsonDeserializer.class.isAssignableFrom(info.config())) {
                 try {
                     Class<? extends JsonDeserializer<?>> config = (Class<? extends JsonDeserializer<?>>) info.config();
                     gson = new GsonBuilder().
-                            registerTypeAdapter(config, config.getConstructor().newInstance()).create();
+                            registerTypeAdapter(config, config.getConstructor(Plugin.PluginConfig.class).newInstance(new Plugin.PluginConfig())).create();
                 } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
                     e.printStackTrace();
                     gson = new Gson();

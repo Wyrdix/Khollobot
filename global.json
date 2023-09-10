@@ -10,12 +10,17 @@
   },
   "mail": {
     "channel_id": 597814414690877451,
-    "enabled": true
+    "enabled": true,
+    "address": [
+    ]
   },
   "cafeteria": {
     "enabled": true
   },
   "calendar": {
+    "enabled": true
+  },
+  "group": {
     "enabled": true
   }
 }
