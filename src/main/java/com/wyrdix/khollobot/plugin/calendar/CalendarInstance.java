@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface CalendarInstance {
-    File CALENDAR_FOLDER = new File("calendars");
+    File CALENDAR_FOLDER = new File("data/calendars");
 
     String id();
 
