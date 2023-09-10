@@ -1,5 +1,6 @@
 package com.wyrdix.khollobot.command.group;
 
+import com.wyrdix.khollobot.GlobalConfig;
 import com.wyrdix.khollobot.KUser;
 import com.wyrdix.khollobot.command.KCommandImpl;
 import com.wyrdix.khollobot.plugin.DefaultPlugin;
@@ -40,6 +41,18 @@ public class GroupCommand extends KCommandImpl {
 
         String group = Objects.requireNonNull(event.getOption("group")).getAsString().trim();
         int subgroup = Objects.requireNonNull(event.getOption("subgroups")).getAsInt();
+
+        GroupPlugin.GroupPluginConfig config = (GroupPlugin.GroupPluginConfig) GlobalConfig.getGlobalConfig().getConfig(GroupPlugin.class);
+
+        if (!config.groups.containsKey(group)) {
+            event.reply("Ce groupe n'existe pas !").queue();
+            return;
+        }
+
+        if (subgroup > config.groups.get(group).subgroup) {
+            event.reply("Ce groupe ne contient pas autant de sous groupes").queue();
+            return;
+        }
 
         KUser kUser = KUser.getKUser(user.getIdLong());
         HashMap<String, GroupPlugin.GroupConfig> configs = new HashMap<>(kUser.get(GroupPlugin.USER_GROUPS));

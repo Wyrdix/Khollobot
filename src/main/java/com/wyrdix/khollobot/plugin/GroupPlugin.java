@@ -8,10 +8,9 @@ import com.wyrdix.khollobot.field.KField;
 import com.wyrdix.khollobot.field.KJsonGroupsField;
 
 import java.lang.reflect.Type;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 
 @PluginInfo(id = "group", name = "Groupe", version = "1.0-SNAPSHOT", author = "Wyrdix", config = GroupPlugin.GroupPluginConfig.class)
 public class GroupPlugin implements Plugin {
@@ -32,7 +31,7 @@ public class GroupPlugin implements Plugin {
 
     public static final class GroupPluginConfig extends PluginConfig implements JsonDeserializer<GroupPluginConfig> {
 
-        public final Set<GroupConfig> groups = new HashSet<>();
+        public final Map<String, GroupConfig> groups = new HashMap<>();
 
         public GroupPluginConfig(PluginConfig config) {
             super(config);
@@ -45,16 +44,18 @@ public class GroupPlugin implements Plugin {
             GroupPluginConfig pluginConfig = new GroupPluginConfig(config);
 
             JsonElement element = json.getAsJsonObject().get("groups");
-            if (element != null && element.isJsonArray()) {
-                JsonArray groups = json.getAsJsonObject().getAsJsonArray("groups");
-                groups.forEach(s -> this.groups.add(GroupConfig.deserialize(s)));
+            if (element != null && element.isJsonObject()) {
+                for (Map.Entry<String, JsonElement> entry : element.getAsJsonObject().entrySet()) {
+                    GroupConfig deserialized = GroupConfig.deserialize(entry.getValue());
+                    pluginConfig.groups.put(deserialized.name, deserialized);
+                }
             }
 
             return pluginConfig;
         }
 
         public void add(String group, int subgroups) {
-            groups.add(new GroupConfig(group, subgroups));
+            groups.put(group, new GroupConfig(group, subgroups));
         }
     }
 

@@ -34,6 +34,11 @@ public class KUser {
 
     public <T> void set(KField<T> field, T value) {
         field.set(this, field.sanitize(value));
+        try {
+            save();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public <T> T get(KField<T> field) {

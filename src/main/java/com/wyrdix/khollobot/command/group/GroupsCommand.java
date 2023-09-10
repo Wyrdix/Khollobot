@@ -32,9 +32,11 @@ public class GroupsCommand extends KCommandImpl {
         KUser kUser = KUser.getKUser(user.getIdLong());
         Map<String, GroupPlugin.GroupConfig> map = new HashMap<>(kUser.get(GroupPlugin.USER_GROUPS));
         GroupPlugin.GroupPluginConfig config = GlobalConfig.getGlobalConfig().getConfig(GroupPlugin.class);
-        config.groups.forEach(s -> {
+        config.groups.values().forEach(s -> {
             if (!map.containsKey(s.name)) map.put(s.name, new GroupPlugin.GroupConfig(s.name, 0));
         });
+
+        map.keySet().removeIf(s -> !config.groups.containsKey(s));
 
         EmbedBuilder builder = new EmbedBuilder();
         builder.setTitle("Liste des groupes");

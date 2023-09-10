@@ -42,6 +42,7 @@ public class KholloBot {
         });
 
         PLUGIN_MAP.values().stream().filter(Plugin::isEnable).forEach(Plugin::onEnable);
+
         getJDA().updateCommands().addCommands(KCommand.COMMAND_MAP.values().stream().map(KCommand::getData).toList()).queue(a->a.forEach(s->{
             String name = s.getFullCommandName();
             long id = s.getIdLong();

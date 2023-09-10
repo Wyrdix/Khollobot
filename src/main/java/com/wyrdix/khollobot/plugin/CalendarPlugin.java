@@ -87,7 +87,7 @@ public class CalendarPlugin extends ListenerAdapter implements Plugin {
         if (!GlobalConfig.getGlobalConfig().getConfig(GroupPlugin.class).isEnabled()) return;
         Map<String, Integer> groups = new HashMap<>();
         GroupPlugin.GroupPluginConfig config = GlobalConfig.getGlobalConfig().getConfig(GroupPlugin.class);
-        for (GroupPlugin.GroupConfig group : config.groups) {
+        for (GroupPlugin.GroupConfig group : config.groups.values()) {
             groups.put(group.name, group.subgroup);
         }
 
