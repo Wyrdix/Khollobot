@@ -5,3 +5,10 @@
 /data.json
 /dependency-reduced-pom.xml
 /login.json
+/.gradle/
+/gradlew
+/gradlew.bat
+/gradle/
+/build/
+./global.json
+/data/

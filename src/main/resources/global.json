@@ -1,0 +1,27 @@
+{
+  "default": {
+    "enabled": true
+  },
+  "id": {
+    "enabled": true,
+    "admins": [
+      198128771516203008
+    ]
+  },
+  "mail": {
+    "enabled": true,
+    "channel_id": -1,
+    "address": [
+
+    ]
+  },
+  "cafeteria": {
+    "enabled": true
+  },
+  "calendar": {
+    "enabled": true
+  },
+  "group": {
+    "enabled": true
+  }
+}
